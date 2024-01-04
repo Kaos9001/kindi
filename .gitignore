@@ -1,0 +1,5 @@
+# Textos auxiliares
+data/
+#Arquivos gerados pela compilação
+sml.json
+*.sml

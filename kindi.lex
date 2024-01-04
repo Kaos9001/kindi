@@ -1,28 +1,24 @@
-datatype lexresult= DIV | EOF | EOS | ID of string | LPAREN |
-                     NUM of int | PLUS | PRINT | RPAREN | SUB | TIMES 
+structure Tokens = Tokens
 
-val linenum = ref 1
-val error = fn x => output(std_out,x ^ "\n")
-val eof = fn () => EOF
+type pos = int
+type svalue = Tokens.svaslue
+type ('a,'b) token = ('a,'b) Tokens.token
+type lexresult= (svalue,pos) token
+
+val pos = ref 0
+fun teste() = print "oi";
+fun error (e,l : int,_) = TextIO.output (TextIO.stdOut, String.concat[
+	"line ", (Int.toString l), ": ", e, "\n"
+      ])
 %%
-%structure KindiLex
-
+%header (functor KindiLexFun(structure Tokens: Kindi_TOKENS));
+char=[A-Za-z];
 digit=[0-9];
-int=(PLUS|SUB)? {digit}+;
-floar=(PLUS|SUB)? ({digit}+ "." {digit}* | {digit}* "." {digit}+);
-number=int|float;
-char=[a-zA-Z];
-
-ws = [\ \t];
+op =[-+*/%><=^];
+white_space = [\ \n\t];
 %%
-\n       => (inc linenum; lex());
-{ws}+    => (lex());
-"/"      => (DIV);
-";"      => (EOS);
-"("      => (LPAREN);
-{digit}+ => (NUM (revfold (fn(a,r)=>ord(a)-ord("0")+10*r) (explode yytext) 0));
-")"      => (RPAREN);
-"+"      => (PLUS);
-"-"      => (SUB);
-"*"      => (TIMES);
-.        => (error ("calc: ignoring bad character "^yytext); lex());
+\n              => (pos := (!pos) + 1; lex());
+{white_space}+  => (lex());
+{digit}+        => (Tokens.NUM (valOf (Int.fromString yytext), !pos, !pos));
+
+"int"   => (Tokens.TYPE(yytext,!pos,!pos));

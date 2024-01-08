@@ -21,10 +21,6 @@ reserved = {
     'string': 'TYPE',
     'array': 'TYPE',
     'wordlist': 'TYPE',
-    '+': 'PLUS',
-    '-': 'MINUS',
-    '*': 'TIMES',
-    '/': 'DIVIDE'
 }
 
 # Todos os possíveis tokens produzidos pelo lexer, a serem usados
@@ -45,6 +41,10 @@ tokens = [
     'IS_GREATER_OR_EQUAL',
     'IS_EQUAL',
     'IS_NOT_EQUAL',
+    'PLUS',
+    'MINUS',
+    'TIMES',
+    'DIVIDE'
 ] + list(set(reserved.values()))
 
 # literals = ['+', '-', '*', '/', '{', '}', '(', ')', '[', ']', ',', '<', '>']
@@ -58,6 +58,10 @@ tokens = [
 # Os tokens mais simples serão sempre os mesmos e são definidos 
 # como segue:
 
+t_PLUS = r'+'
+t_MINUS = r'-'
+t_TIMES = r'*'
+t_DIVIDE = r'/'
 t_ASSIGNMENT = r'='
 t_AND = r'&&'
 t_OR  = r'\|\|'

@@ -20,7 +20,11 @@ reserved = {
     'float': 'TYPE',
     'string': 'TYPE',
     'array': 'TYPE',
-    'wordlist': 'TYPE'
+    'wordlist': 'TYPE',
+    '+': 'PLUS',
+    '-': 'MINUS',
+    '*': 'TIMES',
+    '/': 'DIVIDE'
 }
 
 # Todos os possíveis tokens produzidos pelo lexer, a serem usados
@@ -43,7 +47,7 @@ tokens = [
     'IS_NOT_EQUAL',
 ] + list(set(reserved.values()))
 
-literals = ['+', '-', '*', '/', '{', '}', '(', ')', '[', ']', ',', '<', '>']
+# literals = ['+', '-', '*', '/', '{', '}', '(', ')', '[', ']', ',', '<', '>']
 
 ####################################################
 # Definição dos tokens

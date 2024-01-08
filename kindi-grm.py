@@ -26,7 +26,7 @@ def p_term_factor(p):
     p[0] = p[1]
 
 def p_factor_num(p):
-    'factor : NUMBER'
+    'factor : INT'
     p[0] = p[1]
 
 # Comentei porque ele reclama que não foi definido

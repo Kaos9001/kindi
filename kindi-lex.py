@@ -7,10 +7,12 @@ reserved = {
     'while': 'WHILE',
     'encode': 'ENCODE',
     'decode': 'DECODE',
+    'autodecode': 'AUTODECODE',
     'print': 'PRINT',
     'read': 'READ',
     'write': 'WRITE',
     'subst': 'TYPE',
+    'bool': 'TYPE',
     'int': 'TYPE',
     'float': 'TYPE',
     'string': 'TYPE',
@@ -26,23 +28,42 @@ tokens = [
     'STRING',
     'SUBST',
     'ID',
-    'ORDER_OP',
-    'LOGIC_OP',
+    'ASSIGNMENT',
+    'AND',
+    'OR',
+    'NOT',
+    'IS_SMALLER',
+    'IS_GREATER',
+    'IS_SMALLER_OR_EQUAL',
+    'IS_GREATER_OR_EQUAL',
+    'IS_EQUAL',
+    'IS_NOT_EQUAL',
+    'CIPHER_SELECT_LEFT',
+    'CIPHER_SELECT_RIGHT',
 ] + list(set(reserved.values()))
 
-literals = ['+', '-', '*', '/', '{', '}', '(', ')', '[', ']', '!']
+literals = ['+', '-', '*', '/', '{', '}', '(', ')', '[', ']', ',']
+
+t_ASSIGNMENT = r'='
+t_AND = r'&&'
+t_OR  = r'\|\|'
+t_NOT = r'!'
+t_CIPHER_SELECT_LEFT = r'<<'
+t_CIPHER_SELECT_RIGHT = r'>>'
+t_IS_SMALLER          = r'<'
+t_IS_GREATER          = r'>'
+t_IS_SMALLER_OR_EQUAL = r'<='
+t_IS_GREATER_OR_EQUAL = r'>='
+t_IS_EQUAL            = r'=='
+t_IS_NOT_EQUAL        = r'!='
 
 def t_BOOL(t):
-    r'^True$|^False$'
+    r'True|False'
     t.value = t.value == "True"
     return t
 
-
-# def t_ORDER_OP(t):
-#     pass
-
 def t_FLOAT(t):
-    r'\d+\.\d?'
+    r'\d+\.(\d)*'
     t.value = float(t.value)
     return t
 

@@ -1,7 +1,16 @@
 import ply.lex as lex
 import importlib
+import sys
+
 kindilex = importlib.import_module("kindi-lex")
 
-
 lexer = lex.lex(module=kindilex)
-lexer.input()
+
+with open(sys.argv[1], 'r') as file:
+    content = file.read()
+
+lexer.input(content)
+
+# Tokenize
+for tok in lexer:
+    print(tok)

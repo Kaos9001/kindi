@@ -38,25 +38,25 @@ def t_BOOL(t):
     return t
 
 
-def t_ORDER_OP(t):
-    pass
+# def t_ORDER_OP(t):
+#     pass
 
-def t_FLOAT(self, t):
+def t_FLOAT(t):
     r'\d+\.\d?'
     t.value = float(t.value)
     return t
 
-def t_INT(self, t):
+def t_INT(t):
     r'\d+'
     t.value = int(t.value)
     return t
 
-def t_STRING(self, t):
+def t_STRING(t):
     r'"([^"]|\\")*"'
     t.value = t.value[1:-1]
     return t
 
-def t_SUBST(self, t):
+def t_SUBST(t):
     r'c"([^"]|\\")*"'
     t.value = t.value[2:-1]
     return t

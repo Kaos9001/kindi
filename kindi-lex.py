@@ -1,6 +1,9 @@
 import ply.lex as lex
 
-
+# Palavras reservadas não podem ser usadas com ID pelo usuário,
+# mas podem fazer parte de IDs, e.g. "FIF" é ID válida.
+# Sempre que um candidato a ID for inicializado, será checado
+# se ele não é uma palavra reservada.
 reserved = {
     'if': 'IF',
     'else': 'ELSE',
@@ -20,6 +23,8 @@ reserved = {
     'wordlist': 'TYPE'
 }
 
+# Todos os possíveis tokens produzidos pelo lexer, a serem usados
+# pelo yacc.
 tokens = [
     'INT',
     'BOOL',
@@ -40,6 +45,15 @@ tokens = [
 
 literals = ['+', '-', '*', '/', '{', '}', '(', ')', '[', ']', ',', '<', '>']
 
+####################################################
+# Definição dos tokens
+# Cada token é uma tupla (tipo, valor, número da linha, posição)
+# Esses tokens são adicionados ao objeto lexer na mesma ordem
+# em que aparecem no arquivo fonte.
+
+# Os tokens mais simples serão sempre os mesmos e são definidos 
+# como segue:
+
 t_ASSIGNMENT = r'='
 t_AND = r'&&'
 t_OR  = r'\|\|'
@@ -49,13 +63,19 @@ t_IS_GREATER_OR_EQUAL = r'>='
 t_IS_EQUAL            = r'=='
 t_IS_NOT_EQUAL        = r'!='
 
+# Tokens mais genéricos são definidos com o uso de RegEx:
+# Os valores são convertidos de string para objetos de tipos
+# correlatos em python, e.g. a string recebida que foi detectada como
+# sendo do tipo INT da linguagem Kindi é convertida para o tipo
+# int de python para ser inserida no argumento "valor" do Token.
+
 def t_BOOL(t):
     r'True|False'
     t.value = t.value == "True"
     return t
 
 def t_FLOAT(t):
-    r'\d+\.(\d)*'
+    r'\d+\.(\d)*|\d*\.(\d)+'
     t.value = float(t.value)
     return t
 
@@ -80,6 +100,8 @@ def t_ID(t):
     return t
 
 def t_newline(t):
+    # É interessante mantermos uma contagem de linhas para facilitar
+    # o debuging do programa.
     r'\n+'
     t.lexer.lineno += len(t.value)
 

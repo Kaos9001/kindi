@@ -9,4 +9,4 @@ subst rot13 = c"nopqrstuvwxyzabcdefghijklm"
 falso != verd
 array lista[2] = [0, 1]
 wordlist palavras = {"umas", "palavras"}
-print(encode<<rot13>>(palavras[0]))
+print(encode<rot13>(palavras[0]))

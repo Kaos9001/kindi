@@ -32,26 +32,18 @@ tokens = [
     'AND',
     'OR',
     'NOT',
-    'IS_SMALLER',
-    'IS_GREATER',
     'IS_SMALLER_OR_EQUAL',
     'IS_GREATER_OR_EQUAL',
     'IS_EQUAL',
     'IS_NOT_EQUAL',
-    'CIPHER_SELECT_LEFT',
-    'CIPHER_SELECT_RIGHT',
 ] + list(set(reserved.values()))
 
-literals = ['+', '-', '*', '/', '{', '}', '(', ')', '[', ']', ',']
+literals = ['+', '-', '*', '/', '{', '}', '(', ')', '[', ']', ',', '<', '>']
 
 t_ASSIGNMENT = r'='
 t_AND = r'&&'
 t_OR  = r'\|\|'
 t_NOT = r'!'
-t_CIPHER_SELECT_LEFT = r'<<'
-t_CIPHER_SELECT_RIGHT = r'>>'
-t_IS_SMALLER          = r'<'
-t_IS_GREATER          = r'>'
 t_IS_SMALLER_OR_EQUAL = r'<='
 t_IS_GREATER_OR_EQUAL = r'>='
 t_IS_EQUAL            = r'=='
@@ -84,17 +76,15 @@ def t_SUBST(t):
 
 def t_ID(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
-    t.type = reserved.get(t.value, 'ID')    # Check for reserved words
+    t.type = reserved.get(t.value, 'ID')
     return t
 
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
 
-# A string containing ignored characters (spaces and tabs)
 t_ignore  = ' \t'
 
-# Error handling rule
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)

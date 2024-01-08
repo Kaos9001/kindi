@@ -2,7 +2,7 @@ import ply.lex as lex
 import importlib
 import sys
 
-kindilex = importlib.import_module("kindi-lex")
+kindilex = importlib.import_module("kindilex")
 
 lexer = lex.lex(module=kindilex)
 

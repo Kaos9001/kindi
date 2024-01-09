@@ -84,7 +84,7 @@ def p_bfactor_arithmetic(p):
 
 def p_not_operator(p):
     '''bfactor : ! bfactor'''
-    p[0] = not p[1]
+    p[0] = not p[2]
 
     
 # def p_bfactor_bexpr(p):

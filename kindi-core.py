@@ -18,4 +18,4 @@ lexer.input(content)
 for tok in lexer:
     print(tok)
 
-parser.parse(content)
+print(parser.parse(content, debug=True))

@@ -3,9 +3,16 @@ from kindilex import tokens
 functions = {}
 
 start = 'expression'
+
+precedence = (
+    ('left', '+', '-'),
+    ('left', '*', '/'),
+)
+
 def p_expression(p):
     '''expression : math_exp
                   | boolean_exp
+                  | math_eval_exp
                   | literal'''
     p[0] = p[1]
 
@@ -24,6 +31,7 @@ def p_function_call(p):
        next_argument :
                      | ',' expression next_argument'''
     p[0] = functions[p[1]](*p[3:len(p)-1])
+
 def p_generics(p):
     '''generics : ID
                 | function_call'''
@@ -46,20 +54,22 @@ def p_math_like(p):
                  | generics'''
     p[0] = p[1]
 
-def p_arithmetic_operators(p):
+def p_math_exp(p):
     '''math_exp : math_like '+' math_like
                   | math_like '-' math_like
                   | math_like '*' math_like
                   | math_like '/' math_like
                   | '(' math_exp ')' '''
     if p[2] == '+':
-        p[0] = p[1] + p[3]
+        p[0] = ("sum", p[1], p[3])
     elif p[2] == '-':
-        p[0] = p[1] - p[3]
+        p[0] = ("sub", p[1], p[3])
     elif p[2] == '*':
-        p[0] = p[1] * p[3]
+        p[0] = ("mult", p[1], p[3])
     elif p[2] == '/':
-        p[0] = p[1] / p[3]
+        p[0] = ("div", p[1], p[3])
+    else:
+        p[0] = p[2]
 
 ## Tipo float
 # Precisamos criar a semantica separada desses dois tipos
@@ -82,9 +92,9 @@ def p_boolean_exp(p):
     '''boolean_exp : bool_like OR bool_like
                   | bool_like AND bool_like'''
     if p[2] == r'\|\|':
-        p[0] = p[1] or p[3]
+        p[0] = ("or", p[1], p[3]) #p[1] or p[3]
     elif p[2] == '&&':
-        p[0] = p[1] and p[3]
+        p[0] = ("and", p[1], p[3])
 
 def p_math_eval_exp(p):
     '''math_eval_exp : math_like '<' math_like
@@ -93,21 +103,21 @@ def p_math_eval_exp(p):
                      | math_like IS_EQUAL math_like
                      | math_like IS_NOT_EQUAL math_like'''
     if p[2] == '<':
-        p[0] = p[1] < p[3]
+        p[0] = ("<", p[1], p[3]) #p[1] < p[3]
     elif p[2] == '>':
-        p[0] = p[1] > p[3]
+        p[0] = (">", p[1], p[3]) #p[1] > p[3]
     elif p[2] == '<=':
-        p[0] = p[1] <= p[3]
+        p[0] = ("<=", p[1], p[3]) #p[1] <= p[3]
     elif p[2] == '>=':
-        p[0] = p[1] >= p[3]
+        p[0] = (">=", p[1], p[3]) #p[1] >= p[3]
     elif p[2] == '==':
-        p[0] = p[1] == p[3]
+        p[0] = ("==", p[1], p[3]) #p[1] == p[3]
     elif p[2] == '!=':
-        p[0] = p[1] != p[3]
+        p[0] = ("!=", p[1], p[3]) #p[1] != p[3]
 
 def p_not_operator(p):
     '''bool_like : NOT bool_like'''
-    p[0] = not p[2]
+    p[0] = ("!", p[2])
 
 
 # Error rule for syntax errors

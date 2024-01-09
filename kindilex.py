@@ -37,17 +37,13 @@ tokens = [
     'AND',
     'OR',
     'NOT',
-    'IS_SMALLER_OR_EQUAL',
+    'IS_LESSER_OR_EQUAL',
     'IS_GREATER_OR_EQUAL',
     'IS_EQUAL',
     'IS_NOT_EQUAL',
-    'PLUS',
-    'MINUS',
-    'TIMES',
-    'DIVIDE'
 ] + list(set(reserved.values()))
 
-# literals = ['+', '-', '*', '/', '{', '}', '(', ')', '[', ']', ',', '<', '>']
+literals = ['+', '-', '*', '/', '{', '}', '(', ')', '[', ']', ',', '<', '>']
 
 ####################################################
 # Definição dos tokens
@@ -58,15 +54,11 @@ tokens = [
 # Os tokens mais simples serão sempre os mesmos e são definidos 
 # como segue:
 
-t_PLUS = r'+'
-t_MINUS = r'-'
-t_TIMES = r'*'
-t_DIVIDE = r'/'
 t_ASSIGNMENT = r'='
 t_AND = r'&&'
 t_OR  = r'\|\|'
 t_NOT = r'!'
-t_IS_SMALLER_OR_EQUAL = r'<='
+t_IS_LESSER_OR_EQUAL = r'<='
 t_IS_GREATER_OR_EQUAL = r'>='
 t_IS_EQUAL            = r'=='
 t_IS_NOT_EQUAL        = r'!='

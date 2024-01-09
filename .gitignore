@@ -4,3 +4,5 @@ data/
 # Saídas dos programas
 parser.out
 parsetab.py
+
+__pycache__

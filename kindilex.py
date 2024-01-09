@@ -1,7 +1,7 @@
 import ply.lex as lex
 
 # Palavras reservadas não podem ser usadas com ID pelo usuário,
-# mas podem fazer parte de IDs, e.g. "FIF" é ID válida.
+# mas podem fazer parte de IDs, e.g. "ifelse" é ID válida.
 # Sempre que um candidato a ID for inicializado, será checado
 # se ele não é uma palavra reservada.
 reserved = {

@@ -13,7 +13,8 @@ def p_expression(p):
     '''expression : math_exp
                   | boolean_exp
                   | math_eval_exp
-                  | literal'''
+                  | literal
+                  | string_exp'''
     p[0] = p[1]
 
 def p_literal(p):
@@ -38,7 +39,7 @@ def p_generics(p):
     p[0] = p[1]
 
 ##################################################
-# Semântica das expressões aritméricas
+# Sintaxe das expressões aritméricas
 ## Tipo INT
 def p_int_num(p):
     '''integer : INT
@@ -76,7 +77,7 @@ def p_math_exp(p):
 
 
 ##################################################
-# Semântica das expressões lógicas
+# Sintaxe das expressões lógicas
 def p_bfactor_bool(p):
     '''bool : BOOL'''
     p[0] = p[1]
@@ -102,6 +103,7 @@ def p_math_eval_exp(p):
                      | math_like IS_LESSER_OR_EQUAL math_like
                      | math_like IS_EQUAL math_like
                      | math_like IS_NOT_EQUAL math_like'''
+    # p[0] = (p[2], p[1], p[3])
     if p[2] == '<':
         p[0] = ("<", p[1], p[3]) #p[1] < p[3]
     elif p[2] == '>':
@@ -119,6 +121,15 @@ def p_not_operator(p):
     '''bool_like : NOT bool_like'''
     p[0] = ("!", p[2])
 
+##################################################
+# Sintaxe das expressões de string
+def p_concat_string(p):
+    '''string_exp : string_like '+' string_like'''
+    p[0] = ("concat", p[1], p[3])
+
+def p_stringlike(p):
+    '''string_like : STRING'''
+    p[0] = p[1]
 
 # Error rule for syntax errors
 def p_error(p):

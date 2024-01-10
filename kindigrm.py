@@ -20,7 +20,8 @@ def p_block(p):
 def p_command(p):
     '''command : print
                | assign
-               | reassign'''
+               | reassign
+               | function_call'''
     p[0] = p[1]
 
 def p_print(p):
@@ -59,9 +60,17 @@ def p_literal(p):
 
 def p_function_call(p):
     '''function_call : ID '(' expression next_argument ')'
+                     | ID '(' ')'
        next_argument :
-                     | ',' expression next_argument'''
-    p[0] = functions[p[1]](*p[3:len(p)-1])
+                     | ',' expression next_argument '''
+    if len(p) == 1:
+        p[0] = ()
+    elif p[1] == ",":
+        p[0] = (p[2], *p[3])
+    elif len(p) == 4:
+        p[0] = ("call", p[1], ())
+    elif len(p) > 5:
+        p[0] = ("call", p[1], tuple([p[3]]) + p[4])
 
 def p_generics(p):
     '''generics : ID
@@ -139,7 +148,7 @@ def p_math_eval_exp(p):
                      | math_like IS_GREATER_OR_EQUAL math_like
                      | math_like IS_EQUAL math_like
                      | math_like IS_NOT_EQUAL math_like
-                     | '(' math_exp ')' '''
+                     | '(' math_eval_exp ')' '''
     # p[0] = (p[2], p[1], p[3])
     if p[2] == '<':
         p[0] = ("<", p[1], p[3]) #p[1] < p[3]
@@ -173,6 +182,7 @@ def p_concat_string(p):
 def p_stringlike(p):
     '''string_like : CHAR
                    | STRING
+                   | enc_dec
                    | generics
                    '''
     p[0] = p[1]
@@ -188,25 +198,20 @@ def p_stringlike(p):
 
 
 # Funções reservadas
-def p_encode(p):
-    '''encode : ENCODE '<' string_like '>' '(' string_like ')' 
-              '''
-    p[0] = ("encode", p[3], p[6])
+def p_encode_decode(p):
+    '''enc_dec : ENCODE '<' string_like '>' '(' expression next_argument_enc ')'
+               | DECODE '<' string_like '>' '(' expression next_argument_enc ')'
+       next_argument_enc :
+                     | ',' expression next_argument_enc '''
+    if len(p) == 1:
+        p[0] = ()
+    elif p[1] == ",":
+        p[0] = (p[2], *p[3])
+    elif len(p) == 7:
+        p[0] = (p[1], p[3], ())
+    elif len(p) > 8:
+        p[0] = (p[1], p[3], tuple([p[6]]) + p[7])
 
-def p_encode_w_math_like(p):
-    '''encode : ENCODE '<' string_like '>' '(' string_like ',' math_like ')' 
-              '''
-    p[0] = ("encode", p[3], p[6], p[8])
-        
-def p_encode_w_string_like(p):
-    '''encode : ENCODE '<' string_like '>' '(' string_like ',' string_like ')' 
-              '''
-    p[0] = ("encode", p[3], p[6], p[8])
-        
-        
-def p_expression_e(p):
-    '''expression : encode'''
-    p[0] = p[1]
 ##################################################
 # Laço while
 # def p_while(p):

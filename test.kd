@@ -1,2 +1,2 @@
-print("amogus")
-int a = 42
+print(encode<"rotn">("um teste", 13))
+print(decode<"rotn">("um teste", 13))

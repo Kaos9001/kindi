@@ -6,7 +6,7 @@ bool verd = !falso
 float dec = 0.42
 bool comp = teste < 999
 subst rot13 = c"nopqrstuvwxyzabcdefghijklm"
-falso != verd
+bool check = falso != verd
 array lista[2] = [0, 1]
 wordlist palavras = {"umas", "palavras"}
 print(encode<rot13>(palavras[0]))

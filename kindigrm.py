@@ -42,7 +42,7 @@ def p_generics(p):
                 | function_call'''
     p[0] = p[1]
 
-
+# depois colocamos a tipagem
 def p_assignment(p):
     '''assignment : ID ASSIGNMENT expression'''
     p[0] = ("assignment", p[1], p[3])
@@ -110,8 +110,10 @@ def p_math_eval_exp(p):
     '''math_eval_exp : math_like '<' math_like
                      | math_like '>' math_like
                      | math_like IS_LESSER_OR_EQUAL math_like
+                     | math_like IS_GREATER_OR_EQUAL math_like
                      | math_like IS_EQUAL math_like
-                     | math_like IS_NOT_EQUAL math_like'''
+                     | math_like IS_NOT_EQUAL math_like
+                     | '(' math_exp ')' '''
     # p[0] = (p[2], p[1], p[3])
     if p[2] == '<':
         p[0] = ("<", p[1], p[3]) #p[1] < p[3]
@@ -125,6 +127,8 @@ def p_math_eval_exp(p):
         p[0] = ("==", p[1], p[3]) #p[1] == p[3]
     elif p[2] == '!=':
         p[0] = ("!=", p[1], p[3]) #p[1] != p[3]
+    else:
+        p[0] = p[2]
 
 def p_not_operator(p):
     '''bool_like : NOT bool_like'''

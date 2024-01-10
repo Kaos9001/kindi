@@ -10,30 +10,37 @@ precedence = (
 )
 
 def p_block(p):
-    '''block : command next_command
-       next_command :
-                    | command next_command'''
-    p[0] = ("block", *p[1:])
+    '''block : command
+             | block command'''
+    if len(p) == 2: # um unico comando
+        p[0] = ("block", p[1],)
+    else:
+        p[0] = p[1] + (p[2],) #adicionar os proximos comandos na sequencia
 
 def p_command(p):
     '''command : print
-               | assign'''
-    p[0] = ("comm", p[1])
+               | assign
+               | reassign'''
+    p[0] = p[1]
 
 def p_print(p):
     '''print : PRINT '(' string_like ')' '''
     p[0] = ("print", p[3])
 
 def p_assign(p):
-    '''assign : TYPE ID ASSIGNMENT literal'''
+    '''assign : TYPE ID ASSIGNMENT expression'''
     p[0] = ("assign", p[1], p[2], p[4])
+
+def p_reassign(p):
+    '''reassign : ID ASSIGNMENT expression'''
+    p[0] = ("reassign", p[1], p[3])
 
 def p_expression(p):
     '''expression : math_exp
                   | boolean_exp
                   | math_eval_exp
-                  | assignment
-                  | string_exp'''
+                  | string_exp
+                  | literal'''
     p[0] = p[1]
 
 # isso de literal ta certo? ele ta convertendo 2 em literal
@@ -49,6 +56,7 @@ def p_literal(p):
                | BOOL '''
     p[0] = p[1]
 
+
 def p_function_call(p):
     '''function_call : ID '(' expression next_argument ')'
        next_argument :
@@ -61,9 +69,6 @@ def p_generics(p):
     p[0] = p[1]
 
 # depois colocamos a tipagem
-def p_assignment(p):
-    '''assignment : ID ASSIGNMENT expression'''
-    p[0] = ("assignment", p[1], p[3])
 
 ##################################################
 # Sintaxe das expressões aritméricas

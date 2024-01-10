@@ -2,14 +2,32 @@ import ply.yacc as yacc
 from kindilex import tokens
 functions = {}
 
-start = 'expression'
+start = 'block'
 
 precedence = (
     ('left', '+', '-'),
     ('left', '*', '/'),
 )
 
-# tirei o literal daqui
+def p_block(p):
+    '''block : command next_command
+       next_command :
+                    | command next_command'''
+    p[0] = ("block", *p[1:])
+
+def p_command(p):
+    '''command : print
+               | assign'''
+    p[0] = ("comm", p[1])
+
+def p_print(p):
+    '''print : PRINT '(' string_like ')' '''
+    p[0] = ("print", p[3])
+
+def p_assign(p):
+    '''assign : TYPE ID ASSIGNMENT literal'''
+    p[0] = ("assign", p[1], p[2], p[4])
+
 def p_expression(p):
     '''expression : math_exp
                   | boolean_exp
@@ -21,15 +39,15 @@ def p_expression(p):
 # isso de literal ta certo? ele ta convertendo 2 em literal
 # n sei se o nome literal ta certo, mas de qqr forma
 # colocar 'ID' resolva os problemas
-# def p_literal(p):
-#     '''literal : ID
-#                | INT
-#                | CHAR
-#                | STRING
-#                | SUBST
-#                | FLOAT
-#                | BOOL'''
-#     p[0] = p[1]
+def p_literal(p):
+    '''literal : ID
+               | INT
+               | CHAR
+               | STRING
+               | SUBST
+               | FLOAT
+               | BOOL '''
+    p[0] = p[1]
 
 def p_function_call(p):
     '''function_call : ID '(' expression next_argument ')'

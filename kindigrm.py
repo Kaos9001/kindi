@@ -9,23 +9,27 @@ precedence = (
     ('left', '*', '/'),
 )
 
+# tirei o literal daqui
 def p_expression(p):
     '''expression : math_exp
                   | boolean_exp
                   | math_eval_exp
-                  | literal
+                  | assignment
                   | string_exp'''
     p[0] = p[1]
 
-def p_literal(p):
-    '''literal : ID
-               | INT
-               | CHAR
-               | STRING
-               | SUBST
-               | FLOAT
-               | BOOL'''
-    p[0] = p[1]
+# isso de literal ta certo? ele ta convertendo 2 em literal
+# n sei se o nome literal ta certo, mas de qqr forma
+# colocar 'ID' resolva os problemas
+# def p_literal(p):
+#     '''literal : ID
+#                | INT
+#                | CHAR
+#                | STRING
+#                | SUBST
+#                | FLOAT
+#                | BOOL'''
+#     p[0] = p[1]
 
 def p_function_call(p):
     '''function_call : ID '(' expression next_argument ')'
@@ -37,6 +41,11 @@ def p_generics(p):
     '''generics : ID
                 | function_call'''
     p[0] = p[1]
+
+
+def p_assignment(p):
+    '''assignment : ID ASSIGNMENT expression'''
+    p[0] = ("assignment", p[1], p[3])
 
 ##################################################
 # Sintaxe das expressões aritméricas
@@ -78,7 +87,7 @@ def p_math_exp(p):
 
 ##################################################
 # Sintaxe das expressões lógicas
-def p_bfactor_bool(p):
+def p_bool_bool(p):
     '''bool : BOOL'''
     p[0] = p[1]
 
@@ -127,8 +136,12 @@ def p_concat_string(p):
     '''string_exp : string_like '+' string_like'''
     p[0] = ("concat", p[1], p[3])
 
+# Esta incompleto, fala ainda concat encode decode autodecode
 def p_stringlike(p):
-    '''string_like : STRING'''
+    '''string_like : CHAR
+                   | STRING
+                   | generics
+                   '''
     p[0] = p[1]
 
 # Error rule for syntax errors

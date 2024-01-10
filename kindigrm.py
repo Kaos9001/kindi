@@ -100,11 +100,14 @@ def p_bool_like(p):
 
 def p_boolean_exp(p):
     '''boolean_exp : bool_like OR bool_like
-                  | bool_like AND bool_like'''
+                  | bool_like AND bool_like
+                  | '(' boolean_exp ')' '''
     if p[2] == r'\|\|':
         p[0] = ("or", p[1], p[3]) #p[1] or p[3]
     elif p[2] == '&&':
         p[0] = ("and", p[1], p[3])
+    else:
+        p[0] = p[2]
 
 def p_math_eval_exp(p):
     '''math_eval_exp : math_like '<' math_like
@@ -136,6 +139,9 @@ def p_not_operator(p):
 
 ##################################################
 # Sintaxe das expressões de string
+    
+# não sei ao certo este aqui, como vamos concatenar números?
+# que prioridade damos a 2 + 2 + "frase"?
 def p_concat_string(p):
     '''string_exp : string_like '+' string_like'''
     p[0] = ("concat", p[1], p[3])
@@ -147,6 +153,42 @@ def p_stringlike(p):
                    | generics
                    '''
     p[0] = p[1]
+
+##################################################
+# Chamada de Função
+
+# Temos que ver como fazer a chamada aceitar uma 
+# quantidade arbitraria de argumentos
+    
+# def p_function_call(p):
+#     '''fucntion_call : ID '''
+
+
+# Funções reservadas
+def p_encode(p):
+    '''encode : ENCODE '<' string_like '>' '(' string_like ')' 
+              '''
+    p[0] = ("encode", p[3], p[6])
+
+def p_encode_w_math_like(p):
+    '''encode : ENCODE '<' string_like '>' '(' string_like ',' math_like ')' 
+              '''
+    p[0] = ("encode", p[3], p[6], p[8])
+        
+def p_encode_w_string_like(p):
+    '''encode : ENCODE '<' string_like '>' '(' string_like ',' string_like ')' 
+              '''
+    p[0] = ("encode", p[3], p[6], p[8])
+        
+        
+def p_expression_e(p):
+    '''expression : encode'''
+    p[0] = p[1]
+##################################################
+# Laço while
+# def p_while(p):
+#     '''loop : WHILE '(' bool_like '{' block '}' ')' '''
+#     p[0] = ('while', p[2], p[4])
 
 # Error rule for syntax errors
 def p_error(p):

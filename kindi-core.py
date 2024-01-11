@@ -3,6 +3,7 @@ import ply.yacc as yacc
 import sys
 import kindilex
 import kindigrm
+from kindiinterpreter import evaluate
 
 from pprint import pprint
 
@@ -21,3 +22,7 @@ pprint(ast.to_dict())
 import json
 json_out = json.dumps(ast.to_dict())
 print(json_out)
+
+init_state = {}
+
+print(evaluate(init_state, ast))

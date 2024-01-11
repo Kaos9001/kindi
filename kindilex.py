@@ -100,8 +100,8 @@ def t_SUBST(t):
 def t_ID(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
     t.type = reserved.get(t.value, 'ID')
-    if t.type == 'ID':
-        t.value = ast.ID(id=t.value)
+    #if t.type == 'ID':
+    #    t.value = ast.ID(id=t.value)
     return t
 
 def t_newline(t):

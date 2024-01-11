@@ -18,12 +18,6 @@ class Literal(Node):
         self.type = ltype
 
 
-class Variable(Node):
-    def __init__(self, value=None, vtype=None):
-        self.value = value
-        self.type = vtype
-
-
 class FunctionCall(Node):
     def __init__(self, name=None, args=None):
         self.name = name

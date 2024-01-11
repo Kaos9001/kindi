@@ -129,16 +129,11 @@ def p_math_exp(p):
                   | math_like '*' math_like
                   | math_like '/' math_like
                   | '(' math_exp ')' '''
-    if p[2] == '+':
-        p[0] = ast.BinOp(optype="sum", left=p[1], right=p[3])
-    elif p[2] == '-':
-        p[0] = ast.BinOp(optype="sub", left=p[1], right=p[3])
-    elif p[2] == '*':
-        p[0] = ast.BinOp(optype="mult", left=p[1], right=p[3])
-    elif p[2] == '/':
-        p[0] = ast.BinOp(optype="div", left=p[1], right=p[3])
-    else:
+    if p[1] == '(':
         p[0] = p[2]
+    else:
+        p[0] = ast.BinOp(optype=p[2], left=p[1], right=p[3])
+
 
 ##################################################
 # Sintaxe das expressões lógicas

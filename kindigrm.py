@@ -10,12 +10,11 @@ precedence = (
 
 def p_block(p):
     '''block : command
-             | block command'''
+             | command block'''
     if len(p) == 2: # um unico comando
-        p[0] = ast.Block(commands=[p[1]])
+        p[0] = ast.Block(command=p[1])
     else:
-        p[1].commands.append(p[2])
-        p[0] = p[1] #adicionar os proximos comandos na sequencia
+        p[0] = ast.Block(command=p[1], next_block=p[2])
 
 def p_command(p):
     '''command : print

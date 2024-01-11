@@ -31,8 +31,9 @@ class FunctionCall(Node):
 
 
 class Block(Node):
-    def __init__(self, commands=None):
-        self.commands = commands
+    def __init__(self, command=None, next_block=None):
+        self.command = command
+        self.next_block = next_block
 
 class Array(Node):
     def __init__(self, items=None):

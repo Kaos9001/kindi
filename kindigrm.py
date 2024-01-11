@@ -221,8 +221,9 @@ def p_stringlike(p):
 def p_encode_decode(p):
     '''enc_dec : ENCODE '<' string_like '>' '(' expression next_argument_enc ')'
                | DECODE '<' string_like '>' '(' expression next_argument_enc ')'
+               | AUTODECODE '<' string_like '>' '(' expression next_argument_enc ')'
        next_argument_enc :
-                     | ',' expression next_argument_enc '''
+                         | ',' expression next_argument_enc '''
     if len(p) == 1:
         p[0] = ()
     elif p[1] == ",":

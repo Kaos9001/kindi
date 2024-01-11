@@ -1,1 +1,2 @@
-encode<"lalalala">("bebebe", "aaa)
+encode<"lalalala">("bebebe", "aaa")
+autodecode<"lalala">("bebebe")

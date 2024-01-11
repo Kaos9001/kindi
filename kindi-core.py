@@ -1,12 +1,13 @@
 import ply.lex as lex
 import ply.yacc as yacc
-import importlib
+# import importlib
 import sys
+import kindilex
 import kindigrm
 
 from pprint import pprint
 
-kindilex = importlib.import_module("kindilex")
+# kindilex = importlib.import_module("kindilex")
 
 lexer = lex.lex(module=kindilex)
 parser = yacc.yacc(module=kindigrm)

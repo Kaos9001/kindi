@@ -4,6 +4,8 @@ import importlib
 import sys
 import kindigrm
 
+from pprint import pprint
+
 kindilex = importlib.import_module("kindilex")
 
 lexer = lex.lex(module=kindilex)
@@ -14,8 +16,6 @@ with open(sys.argv[1], 'r') as file:
 
 lexer.input(content)
 
-# Tokenize
-for tok in lexer:
-    print(tok)
+ast = parser.parse(content)
 
-print(parser.parse(content, debug=True))
+pprint(ast.to_dict())

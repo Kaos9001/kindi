@@ -1,7 +1,6 @@
 import ply.yacc as yacc
 from kindilex import tokens
-functions = {}
-
+import kindiast as ast
 start = 'block'
 
 precedence = (
@@ -13,50 +12,78 @@ def p_block(p):
     '''block : command
              | block command'''
     if len(p) == 2: # um unico comando
-        p[0] = ("block", p[1],)
+        p[0] = ast.Block(commands=[p[1]])
     else:
-        p[0] = p[1] + (p[2],) #adicionar os proximos comandos na sequencia
+        p[1].commands.append(p[2])
+        p[0] = p[1] #adicionar os proximos comandos na sequencia
 
 def p_command(p):
     '''command : print
                | assign
                | reassign
-               | function_call'''
+               | function_call
+               | conditional
+               | whileloop
+               | write
+               | assign_array'''
     p[0] = p[1]
 
 def p_print(p):
     '''print : PRINT '(' string_like ')' '''
-    p[0] = ("print", p[3])
+    p[0] = ast.Print(content=p[3])
+
+def p_read(p):
+    '''read : READ '(' string_like ')' '''
+    p[0] = ast.Read(file=p[3])
+
+def p_write(p):
+    '''write : WRITE '(' string_like ',' string_like ')' '''
+    p[0] = ast.Write(file=p[3], content=p[5])
+
+def p_assign_array(p):
+    '''assign_array : TYPE ID '[' INT ']' ASSIGNMENT generics
+                   | TYPE ID '[' INT ']' ASSIGNMENT array '''
+    p[0] = ast.AssignArray(vtype=p[1], id=p[2], length=p[4], content=p[7])
+
+def p_array(p):
+    '''array : '[' expression next_item ']'
+       next_item :
+                | ',' expression next_item '''
+    if len(p) == 1:
+        p[0] = []
+    elif p[1] == ",":
+        p[0] = [p[2], *p[3]]
+    elif len(p) > 3:
+        p[0] = ast.Array(items=list([p[2]]) + p[3])
+
+# TODO: acesso a arrays, indices, reassing de arrays
 
 def p_assign(p):
     '''assign : TYPE ID ASSIGNMENT expression'''
-    p[0] = ("assign", p[1], p[2], p[4])
+    p[0] = ast.Assign(vtype=p[1], id=p[2], value=p[4])
 
 def p_reassign(p):
     '''reassign : ID ASSIGNMENT expression'''
-    p[0] = ("reassign", p[1], p[3])
+    p[0] = ast.Reassign(id=p[1], value=p[3])
 
 def p_expression(p):
     '''expression : math_exp
                   | boolean_exp
                   | math_eval_exp
                   | string_exp
-                  | literal'''
+                  | literal
+                  | array'''
     p[0] = p[1]
 
-# isso de literal ta certo? ele ta convertendo 2 em literal
-# n sei se o nome literal ta certo, mas de qqr forma
-# colocar 'ID' resolva os problemas
 def p_literal(p):
     '''literal : ID
-               | INT
+               | integer
                | CHAR
                | STRING
                | SUBST
-               | FLOAT
+               | float
                | BOOL '''
     p[0] = p[1]
-
 
 def p_function_call(p):
     '''function_call : ID '(' expression next_argument ')'
@@ -68,30 +95,31 @@ def p_function_call(p):
     elif p[1] == ",":
         p[0] = (p[2], *p[3])
     elif len(p) == 4:
-        p[0] = ("call", p[1], ())
+        p[0] = ast.FunctionCall(name=p[1], args=())
     elif len(p) > 5:
-        p[0] = ("call", p[1], tuple([p[3]]) + p[4])
+        p[0] = ast.FunctionCall(name=p[1], args=tuple([p[3]]) + p[4])
 
 def p_generics(p):
     '''generics : ID
                 | function_call'''
     p[0] = p[1]
 
-# depois colocamos a tipagem
-
 ##################################################
-# Sintaxe das expressões aritméricas
-## Tipo INT
-def p_int_num(p):
+# Sintaxe das expressões aritméticas
+def p_num(p):
     '''integer : INT
-              | '-' INT '''
+              | '-' INT
+        float : FLOAT
+              | '-' FLOAT '''
     if len(p) == 2:
         p[0] = p[1]
     else:
-        p[0] = -p[2]
+        p[2].value *= -1
+        p[0] = p[2]
 
 def p_math_like(p):
     '''math_like : integer
+                 | float
                  | math_exp
                  | generics'''
     p[0] = p[1]
@@ -103,19 +131,15 @@ def p_math_exp(p):
                   | math_like '/' math_like
                   | '(' math_exp ')' '''
     if p[2] == '+':
-        p[0] = ("sum", p[1], p[3])
+        p[0] = ast.BinOp(optype="sum", left=p[1], right=p[3])
     elif p[2] == '-':
-        p[0] = ("sub", p[1], p[3])
+        p[0] = ast.BinOp(optype="sub", left=p[1], right=p[3])
     elif p[2] == '*':
-        p[0] = ("mult", p[1], p[3])
+        p[0] = ast.BinOp(optype="mult", left=p[1], right=p[3])
     elif p[2] == '/':
-        p[0] = ("div", p[1], p[3])
+        p[0] = ast.BinOp(optype="div", left=p[1], right=p[3])
     else:
         p[0] = p[2]
-
-## Tipo float
-# Precisamos criar a semantica separada desses dois tipos
-
 
 ##################################################
 # Sintaxe das expressões lógicas
@@ -135,9 +159,9 @@ def p_boolean_exp(p):
                   | bool_like AND bool_like
                   | '(' boolean_exp ')' '''
     if p[2] == r'\|\|':
-        p[0] = ("or", p[1], p[3]) #p[1] or p[3]
+        p[0] = ast.BinOp(optype="or", left=p[1], right=p[3])
     elif p[2] == '&&':
-        p[0] = ("and", p[1], p[3])
+        p[0] = ast.BinOp(optype="and", left=p[1], right=p[3])
     else:
         p[0] = p[2]
 
@@ -151,52 +175,48 @@ def p_math_eval_exp(p):
                      | '(' math_eval_exp ')' '''
     # p[0] = (p[2], p[1], p[3])
     if p[2] == '<':
-        p[0] = ("<", p[1], p[3]) #p[1] < p[3]
+        p[0] = ast.BinOp(optype="<", left=p[1], right=p[3])
     elif p[2] == '>':
-        p[0] = (">", p[1], p[3]) #p[1] > p[3]
+        p[0] = ast.BinOp(optype=">", left=p[1], right=p[3])
     elif p[2] == '<=':
-        p[0] = ("<=", p[1], p[3]) #p[1] <= p[3]
+        p[0] = ast.BinOp(optype="<=", left=p[1], right=p[3])
     elif p[2] == '>=':
-        p[0] = (">=", p[1], p[3]) #p[1] >= p[3]
+        p[0] = ast.BinOp(optype=">=", left=p[1], right=p[3])
     elif p[2] == '==':
-        p[0] = ("==", p[1], p[3]) #p[1] == p[3]
+        p[0] = ast.BinOp(optype="==", left=p[1], right=p[3])
     elif p[2] == '!=':
-        p[0] = ("!=", p[1], p[3]) #p[1] != p[3]
+        p[0] = ast.BinOp(optype="!=", left=p[1], right=p[3])
     else:
         p[0] = p[2]
 
 def p_not_operator(p):
     '''bool_like : NOT bool_like'''
-    p[0] = ("!", p[2])
+    p[0] = ast.UnaryOp(optype="!", arg=p[2])
 
 ##################################################
 # Sintaxe das expressões de string
     
 # não sei ao certo este aqui, como vamos concatenar números?
 # que prioridade damos a 2 + 2 + "frase"?
-def p_concat_string(p):
-    '''string_exp : string_like '+' string_like'''
-    p[0] = ("concat", p[1], p[3])
+def p_string_exp(p):
+    '''string_exp : concat
+                  | read
+                  | enc_dec '''
+    p[0] = p[1]
 
-# Esta incompleto, fala ainda concat encode decode autodecode
+def p_concat_string(p):
+    '''concat : string_like '+' string_like'''
+    p[0] = ast.Concat(left=p[1], right=p[3])
+
 def p_stringlike(p):
     '''string_like : CHAR
                    | STRING
-                   | enc_dec
+                   | string_exp
                    | generics
                    '''
     p[0] = p[1]
 
 ##################################################
-# Chamada de Função
-
-# Temos que ver como fazer a chamada aceitar uma 
-# quantidade arbitraria de argumentos
-    
-# def p_function_call(p):
-#     '''fucntion_call : ID '''
-
-
 # Funções reservadas
 def p_encode_decode(p):
     '''enc_dec : ENCODE '<' string_like '>' '(' expression next_argument_enc ')'
@@ -207,16 +227,27 @@ def p_encode_decode(p):
         p[0] = ()
     elif p[1] == ",":
         p[0] = (p[2], *p[3])
-    elif len(p) == 7:
-        p[0] = (p[1], p[3], ())
     elif len(p) > 8:
-        p[0] = (p[1], p[3], tuple([p[6]]) + p[7])
+        p[0] = ast.Crypt(ctype=p[1], style=p[3], args=tuple([p[6]]) + p[7])
 
 ##################################################
-# Laço while
-# def p_while(p):
-#     '''loop : WHILE '(' bool_like '{' block '}' ')' '''
-#     p[0] = ('while', p[2], p[4])
+
+def p_conditional(p):
+    '''conditional : IF '(' bool_like ')' '{' block '}' else_cond
+       else_cond :
+                 | ELSE '{' block '}' '''
+    if len(p) == 1:
+        p[0] = None
+    elif p[1] == "else":
+        p[0] = p[3]
+    else:
+        p[0] = ast.Conditional(condition=p[3], on_true=p[6], on_else=p[8])
+
+def p_while(p):
+    '''whileloop : WHILE '(' bool_like ')' '{' block '}'  '''
+    p[0] = ast.While(condition=p[3], block=p[6])
+
+
 
 # Error rule for syntax errors
 def p_error(p):

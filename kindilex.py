@@ -1,4 +1,5 @@
 import ply.lex as lex
+import kindiast as ast
 
 # Palavras reservadas não podem ser usadas com ID pelo usuário,
 # mas podem fazer parte de IDs, e.g. "ifelse" é ID válida.
@@ -64,39 +65,43 @@ t_IS_EQUAL            = r'=='
 t_IS_NOT_EQUAL        = r'!='
 
 # Tokens mais genéricos são definidos com o uso de RegEx:
-# Os valores são convertidos de string para objetos de tipos
-# correlatos em python, e.g. a string recebida que foi detectada como
-# sendo do tipo INT da linguagem Kindi é convertida para o tipo
-# int de python para ser inserida no argumento "valor" do Token.
+# Os valores são convertidos de string para objetos que encapsulam
+# seu tipo para futuro processamento
+
+def t_COMMENT(t):
+    r'\#.*'
+    pass
 
 def t_BOOL(t):
     r'True|False'
-    t.value = t.value == "True"
+    t.value = ast.Literal(ltype="bool", value=(t.value == "True"))
     return t
 
 def t_FLOAT(t):
     r'\d+\.(\d)*|\d*\.(\d)+'
-    t.value = float(t.value)
+    t.value = ast.Literal(ltype="float", value=float(t.value))
     return t
 
 def t_INT(t):
     r'\d+'
-    t.value = int(t.value)
+    t.value = ast.Literal(ltype="int", value=int(t.value))
     return t
 
 def t_STRING(t):
     r'"([^"]|\\")*"'
-    t.value = t.value[1:-1]
+    t.value = ast.Literal(ltype="string", value=t.value[1:-1])
     return t
 
 def t_SUBST(t):
     r'c"([^"]|\\")*"'
-    t.value = t.value[2:-1]
+    t.value = ast.Literal(ltype="subst", value=t.value[2:-1])
     return t
 
 def t_ID(t):
     r'[a-zA-Z_][a-zA-Z_0-9]*'
     t.type = reserved.get(t.value, 'ID')
+    if t.type == 'ID':
+        t.value = ast.ID(id=t.value)
     return t
 
 def t_newline(t):

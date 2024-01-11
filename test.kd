@@ -1,2 +1,7 @@
-print(encode<"rotn">("um teste", 13))
-print(decode<"rotn">("um teste", 13))
+string mensagem = read("carta")
+string decodificado = decode<"caesar">(mensagem)
+print(decodificado)
+write("resultado", "MENSAGEM DECODIFICADA " + decodificado)
+# não se preocupa se esse "MENSAGEM DECODIFICADA" vier quebrado em duas linhas no output
+# é coisa do prettyprint e não do nosso codigo
+int so_pra_testar_que_codigo_depois_de_comentario_funciona = 0

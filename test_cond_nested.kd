@@ -1,0 +1,15 @@
+int teste = 42 + 42
+teste = (teste+8)*3
+bool falso = False
+float dec = 0.42
+bool comp = teste < 999
+subst rot13 = c"nopqrstuvwxyzabcdefghijklm"
+bool check = falso != verd
+print(encode<rot13>(palavras))
+while(falso)
+{
+    print("amogus")
+    if(42 > 9){
+        teste = teste + 4
+    }
+}

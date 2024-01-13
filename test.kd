@@ -2,6 +2,7 @@ function isPrime(int n)
 {
     int i = 2
     return("a")
+    isPrime(432)
     return("b")
 }
 

@@ -46,16 +46,16 @@ def evaluate(state, action):
     # Literal (ex: 2)
     if isinstance(action, ast.Block):
         block = action
+        if isinstance(block.command, ast.Return):
+            new_state, out = evaluate(state, block.command.value)
+            return new_state, out
         new_state = evaluate(state, block.command)[0]
         if block.next_block is not None:
             if state.get("_return", None) is not None:
                 return state, None
             return evaluate(new_state, block.next_block)
         else:
-            return new_state, state.get("_return", 0)
-
-    elif state.get("_return", None) is not None:
-        return state, None
+            return new_state, 0
 
     elif isinstance(action, ast.Literal):
         literal = action
@@ -186,7 +186,6 @@ def evaluate(state, action):
         if state[call.id].type == 'builtin_func':
             return state, func.call(args)
         else:
-            func_state["_return"] = None
             return state, evaluate(func_state, func.block)[1]
 
     elif isinstance(action, ast.FunctionDef):
@@ -197,8 +196,3 @@ def evaluate(state, action):
         state[function_def.id] = Value(value=new_function, vtype='user_func')
         return state, None
 
-    elif isinstance(action, ast.Return):
-        f_return = action
-        out = evaluate(state, f_return.value)[1]
-        state["_return"] = out
-        return state, out

@@ -44,7 +44,20 @@ class OverloadedFunction(WrappedFunction):
 
 def evaluate(state, action):
     # Literal (ex: 2)
-    if isinstance(action, ast.Literal):
+    if isinstance(action, ast.Block):
+        block = action
+        new_state = evaluate(state, block.command)[0]
+        if block.next_block is not None:
+            if state.get("_return", None) is not None:
+                return state, None
+            return evaluate(new_state, block.next_block)
+        else:
+            return new_state, state.get("_return", 0)
+
+    elif state.get("_return", None) is not None:
+        return state, None
+
+    elif isinstance(action, ast.Literal):
         literal = action
         return state, Value(value=literal.value, vtype=literal.type)
 
@@ -56,13 +69,6 @@ def evaluate(state, action):
         return state, state[var_name]
 
     # Cadeia de comandos (ponto de entrada)
-    elif isinstance(action, ast.Block):
-        block = action
-        new_state = evaluate(state, block.command)[0]
-        if block.next_block is not None:
-            return evaluate(new_state, block.next_block)
-        else:
-            return new_state, state.get("_return", 0)
 
     # Declaracao de variaveis (ex: int a = 1)
     elif isinstance(action, ast.Assign):
@@ -107,6 +113,8 @@ def evaluate(state, action):
                     return state, Value(value=left.value // right.value, vtype=left.type)
                 else:
                     print("????????????")
+            elif action.optype == "%":
+                return state, Value(value=left.value % right.value, vtype=left.type)
             elif action.optype == "<":
                 return state, Value(value=left.value < right.value, vtype='bool')
             elif action.optype == ">":
@@ -178,6 +186,7 @@ def evaluate(state, action):
         if state[call.id].type == 'builtin_func':
             return state, func.call(args)
         else:
+            func_state["_return"] = None
             return state, evaluate(func_state, func.block)[1]
 
     elif isinstance(action, ast.FunctionDef):

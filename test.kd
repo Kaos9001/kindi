@@ -1,11 +1,8 @@
-subst amogus = c"abcdefghijklmnopqrstuvwxyz"
-
-function rot2(subst in, int n)
+function isPrime(int n)
 {
-    print("yeehaw")
-    return (rot(in, n * 2))
+    int i = 2
+    return("a")
+    return("b")
 }
 
-print(rot2(amogus, 1))
-print(toString(5))
-print(toString(5.0))
+print(isPrime(10))

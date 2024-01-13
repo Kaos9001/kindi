@@ -111,7 +111,6 @@ def p_function_def(p):
        def_next_argument :
                      | ',' TYPE ID def_next_argument
     '''
-    print(list(p))
     if len(p) == 1:
         p[0] = ()
     elif p[1] == ",":
@@ -151,6 +150,7 @@ def p_math_exp(p):
                   | math_like '-' math_like
                   | math_like '*' math_like
                   | math_like '/' math_like
+                  | math_like '%' math_like
                   | '(' math_exp ')' '''
     if p[1] == '(':
         p[0] = p[2]

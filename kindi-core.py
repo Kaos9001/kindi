@@ -3,9 +3,11 @@ import ply.yacc as yacc
 import sys
 import kindilex
 import kindigrm
-from kindiinterpreter import evaluate
+from kindiinterpreter import evaluate, WrappedFunction, OverloadedFunction, Value
 
 from pprint import pprint
+
+debug = False
 
 lexer = lex.lex(module=kindilex)
 parser = yacc.yacc(module=kindigrm)
@@ -15,7 +17,7 @@ with open(sys.argv[1], 'r') as file:
 
 lexer.input(content)
 
-ast = parser.parse(content)
+ast = parser.parse(content, debug=debug)
 
 pprint(ast.to_dict())
 
@@ -23,6 +25,19 @@ import json
 json_out = json.dumps(ast.to_dict())
 print(json_out)
 
-init_state = {}
+kd_toString = Value(value=OverloadedFunction(
+                        arg_sets=[[Value(value="s", vtype="int")],
+                                  [Value(value="s", vtype="float")],
+                                  [Value(value="s", vtype="bool")]],
+                        func=lambda s: Value(value=str(s.value), vtype="string")),
+                    vtype='builtin_func')
 
-print(evaluate(init_state, ast))
+kd_rot = Value(vtype="builtin_func", value=WrappedFunction(
+    args=[Value(value="to_rotate", vtype="subst"), Value(value="n", vtype='int')],
+    func=lambda s, n: Value(value=s.value[n.value:] + s.value[:n.value], vtype='subst')))
+
+init_state = {"toString":kd_toString, "rot":kd_rot}
+print(f"KINDI: RUNNING {sys.argv[1]}")
+final_state = evaluate(init_state, ast)
+print()
+print(f"Final Memory State: {final_state}")

@@ -15,6 +15,8 @@ reserved = {
     'print': 'PRINT',
     'read': 'READ',
     'write': 'WRITE',
+    'function' : "FUNCTION_DEF",
+    'return' : "RETURN",
     'subst': 'TYPE',
     'bool': 'TYPE',
     'int': 'TYPE',

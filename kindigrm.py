@@ -21,14 +21,22 @@ def p_command(p):
                | assign
                | reassign
                | function_call
+               | function_def
                | conditional
                | whileloop
                | write
+               | return
                | assign_array'''
     p[0] = p[1]
 
+def p_return(p):
+    '''return : RETURN '(' expression ')'
+              | RETURN '(' generics ')' '''
+    p[0] = ast.Return(value=p[3])
+
 def p_print(p):
-    '''print : PRINT '(' string_like ')' '''
+    '''print : PRINT '(' string_like ')'
+             | PRINT '(' SUBST ')' '''
     p[0] = ast.Print(content=p[3])
 
 def p_read(p):
@@ -94,9 +102,24 @@ def p_function_call(p):
     elif p[1] == ",":
         p[0] = (p[2], *p[3])
     elif len(p) == 4:
-        p[0] = ast.FunctionCall(name=p[1], args=())
+        p[0] = ast.FunctionCall(id=p[1], args=())
     elif len(p) > 5:
-        p[0] = ast.FunctionCall(name=p[1], args=tuple([p[3]]) + p[4])
+        p[0] = ast.FunctionCall(id=p[1], args=tuple([p[3]]) + p[4])
+
+def p_function_def(p):
+    '''function_def : FUNCTION_DEF ID '(' TYPE ID def_next_argument ')' '{' block '}'
+       def_next_argument :
+                     | ',' TYPE ID def_next_argument
+    '''
+    print(list(p))
+    if len(p) == 1:
+        p[0] = ()
+    elif p[1] == ",":
+        p[0] = (ast.Argument(id=p[3], atype=p[2]), *p[4])
+    elif len(p) == 4:
+        p[0] = ast.FunctionDef(id=p[2], args=(), on_call=p[10])
+    elif len(p) > 5:
+        p[0] = ast.FunctionDef(id=p[2], args=tuple([ast.Argument(id=p[5], atype=p[4])]) + p[6], on_call=p[9])
 
 def p_generics(p):
     '''generics : ID

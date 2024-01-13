@@ -1,6 +1,11 @@
-int a = 10
-if (a < 20)
+subst amogus = c"abcdefghijklmnopqrstuvwxyz"
+
+function rot2(subst in, int n)
 {
-    a = 20
-    int b = 42
+    print("yeehaw")
+    return (rot(in, n * 2))
 }
+
+print(rot2(amogus, 1))
+print(toString(5))
+print(toString(5.0))

@@ -19,8 +19,8 @@ class Literal(Node):
 
 
 class FunctionCall(Node):
-    def __init__(self, name=None, args=None):
-        self.name = name
+    def __init__(self, id=None, args=None):
+        self.id = id
         self.args = args
 
 
@@ -50,6 +50,11 @@ class Assign(Node):
 class Reassign(Node):
     def __init__(self, id=None, value=None):
         self.id = id
+        self.value = value
+
+
+class Return(Node):
+    def __init__(self, value=None):
         self.value = value
 
 
@@ -104,3 +109,14 @@ class While(Node):
     def __init__(self, condition=None, block=None):
         self.condition = condition
         self.block = block
+
+class FunctionDef(Node):
+    def __init__(self, on_call=None, args=None, id=None):
+        self.args = args
+        self.on_call = on_call
+        self.id = id
+
+class Argument(Node):
+    def __init__(self, id=None, atype=None):
+        self.id = id
+        self.type = atype

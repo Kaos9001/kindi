@@ -94,9 +94,12 @@ def p_literal(p):
 
 def p_function_call(p):
     '''function_call : ID '(' expression next_argument ')'
+                     | ID '(' generics next_argument ')'
                      | ID '(' ')'
        next_argument :
+                     | ',' generics next_argument
                      | ',' expression next_argument '''
+
     if len(p) == 1:
         p[0] = ()
     elif p[1] == ",":

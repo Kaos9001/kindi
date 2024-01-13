@@ -2,6 +2,7 @@ import kindiast as ast
 from collections import namedtuple
 from kindierrors import *
 from kindilex import reserved
+import json
 
 class Value:
     def __init__(self, value=None, vtype=None):
@@ -46,13 +47,10 @@ def evaluate(state, action):
     # Literal (ex: 2)
     if isinstance(action, ast.Block):
         block = action
-        if isinstance(block.command, ast.Return):
-            new_state, out = evaluate(state, block.command.value)
-            return new_state, out
-        new_state = evaluate(state, block.command)[0]
+        new_state, return_val = evaluate(state, block.command)
+        if return_val is not None:
+            return new_state, return_val
         if block.next_block is not None:
-            if state.get("_return", None) is not None:
-                return state, None
             return evaluate(new_state, block.next_block)
         else:
             return new_state, 0
@@ -135,11 +133,12 @@ def evaluate(state, action):
 
     elif isinstance(action, ast.Conditional):
         conditional = action
+        out = None
         if evaluate(state, conditional.condition)[1].value is True:
-            evaluate(state.copy(), conditional.on_true)
+            out = evaluate(state.copy(), conditional.on_true)[1]
         elif conditional.on_else is not None:
-            evaluate(state.copy(), conditional.on_else)
-        return state, None
+            out = evaluate(state.copy(), conditional.on_else)[1]
+        return state, out
 
     elif isinstance(action, ast.Print):
         print_command = action
@@ -186,7 +185,8 @@ def evaluate(state, action):
         if state[call.id].type == 'builtin_func':
             return state, func.call(args)
         else:
-            return state, evaluate(func_state, func.block)[1]
+            out = evaluate(func_state, func.block)[1]
+            return state, out
 
     elif isinstance(action, ast.FunctionDef):
         function_def = action
@@ -195,4 +195,8 @@ def evaluate(state, action):
         new_function = UserFunction(args=function_def.args, block=function_def.on_call)
         state[function_def.id] = Value(value=new_function, vtype='user_func')
         return state, None
+
+    elif isinstance(action, ast.Return):
+        new_state, out = evaluate(state, action.value)
+        return new_state, out
 

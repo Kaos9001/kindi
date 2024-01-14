@@ -1,3 +1,5 @@
+from kindierrors import *
+
 alphabet_lower = "abcdefghijklmnopqrstuvwxyz"
 alphabet_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -63,10 +65,15 @@ def autokey(text, key, arg):
             number_key.pop(0)
         return answer
 
+def one_time_pad(text, key, arg):
+    if len(key) >= len(text):
+        return vigenere(text, key, arg)
+    else:
+        error_msg = "Key lenght of incompatible lenght ({}), expected: {}".format(len(key), len(text))
+        raise OneTimePadKeyLenError(error_msg)
 
 
-
-a = autokey("attackatdawn", "QUEENLY", "encode")
+a = one_time_pad("attackatdawn", "abcdefghijklmnopq", "encode")
 print(a)
-b = autokey(a, "QUEENLY", "decode")
+b = one_time_pad(a, "abcdefghijklmnopq", "decode")
 print(b)

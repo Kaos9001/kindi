@@ -60,3 +60,6 @@ class FileDoesNotExistError(Exception):
 
 class NonStringInWordlistError(Exception):
     pass
+
+class OneTimePadKeyLenError(Exception):
+    pass

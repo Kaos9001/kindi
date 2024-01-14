@@ -49,8 +49,23 @@ kd_rot = Value(vtype="builtin_func", value=WrappedFunction(
     args=[Value(value="to_rotate", vtype="subst"), Value(value="n", vtype='int')],
     func=lambda s, n: Value(value=s.value[n.value:] + s.value[:n.value], vtype='subst')))
 
+kd_ind = Value(vtype="builtin_func", value=WrappedFunction(
+    args=[Value(value="char", vtype="string")],
+    func=lambda s: Value(value="abcdefghijklmnopqrstuvwxyz".index(s.value.lower()), vtype='int')))
 
-init_state = {"toString":kd_toString, "rot":kd_rot, "fill":kd_fill}
+def ind(char):
+    if len(char) != 1:
+        raise Exception()
+
+
+
+init_state = {
+    "toString":kd_toString,
+    "rot":kd_rot,
+    "fill":kd_fill,
+    "ALPH": Value(value="abcdefghijklmnopqrstuvwxyz", vtype="string"),
+    "ALPHSUB": Value(value="abcdefghijklmnopqrstuvwxyz", vtype="subst"),
+    }
 print(f"KINDI: RUNNING {sys.argv[1]}")
 final_state = evaluate(init_state, ast)
 print()

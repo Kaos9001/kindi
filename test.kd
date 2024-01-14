@@ -1,1 +1,2 @@
-print(read("teste.txt"))
+string a = "a"
+print(toString(a))

@@ -66,30 +66,6 @@ def evaluate(state, action):
         else:
             return new_state, 0
 
-    elif isinstance(action, ast.AssignWordlist):
-        wordlist_assignment = action
-        if wordlist_assignment.id in state:
-            raise VariableAlreadyDefinedError(wordlist_assignment.id)
-        candidate_wordlist = evaluate(state, wordlist_assignment.content)[1]
-        state[wordlist_assignment.id] = candidate_wordlist
-        return state, None
-
-    elif isinstance(action, ast.ReassignWordlist):
-        wordlist_reassignment = action
-        if wordlist_reassignment.id not in state:
-            raise VariableNotDefinedError(wordlist_reassignment.id)
-        candidate_value = evaluate(state, wordlist_reassignment.value)[1]
-        wordlist = state[wordlist_reassignment.id].value
-        if candidate_value.type != "string":
-            raise ReassignmentUnmatchedTypeError("string", candidate_value.type)
-        index = evaluate(state, wordlist_reassignment.index)[1]
-        if index.type != 'int':
-            raise IndexNotAnIntegerError(index)
-        if index.value < 0 or index.value >= len(wordlist):
-            raise OutOfBoundsError(len(wordlist), index.value)
-        wordlist[index.value] = candidate_value
-        return state, None
-
     elif isinstance(action, ast.AssignArray):
         array_assignment = action
         if array_assignment.id in state:
@@ -231,14 +207,6 @@ def evaluate(state, action):
             raise VariableNotDefinedError(var_name)
         return state, state[var_name]
 
-    elif isinstance(action, ast.Wordlist):
-        wordlist = action
-        candidate_wordlist = [evaluate(state, candidate_item)[1] for candidate_item in wordlist.items]
-        for candidate_item in candidate_wordlist:
-            if candidate_item.type != "string":
-                raise NonStringInWordlistError(candidate_item)
-        return state, Value(vtype='wordlist', value=candidate_wordlist)
-
     elif isinstance(action, ast.Array):
         array = action
         candidate_array = [evaluate(state, candidate_item)[1] for candidate_item in array.items]
@@ -258,20 +226,6 @@ def evaluate(state, action):
             raise VariableNotDefinedError(get_from_array.id)
         if state[get_from_array.id].type != 'array':
             raise NotAnArrayError(get_from_array.id)
-        array = state[get_from_array.id].value
-        index = evaluate(state, get_from_array.index)[1]
-        if index.type != 'int':
-            raise IndexNotAnIntegerError(index)
-        if index.value < 0 or index.value >= len(array.items):
-            raise OutOfBoundsError(len(array.items), index.value)
-        return state, array.items[index.value]
-
-    elif isinstance(action, ast.GetFromWordlist):
-        get_from_wordlist = action
-        if get_from_wordlist.id not in state:
-            raise VariableNotDefinedError(get_from_wordlist.id)
-        if state[get_from_wordlist.id].type != 'wordlist':
-            raise NotAnArrayError(get_from_wordlist.id)
         array = state[get_from_array.id].value
         index = evaluate(state, get_from_array.index)[1]
         if index.type != 'int':

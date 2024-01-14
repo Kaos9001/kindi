@@ -61,5 +61,5 @@ class FileDoesNotExistError(Exception):
 class NonStringInWordlistError(Exception):
     pass
 
-class OneTimePadKeyLenError(Exception):
+class EncryptionKeyLenError(Exception):
     pass

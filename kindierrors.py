@@ -30,3 +30,18 @@ class InvalidArgumentsError(Exception):
 
 class ReservedWordInArgumentsError(Exception):
     pass
+
+class NotAnArrayError(Exception):
+    pass
+
+class OutOfBoundsError(Exception):
+    pass
+
+class MixedTypesInArrayError(Exception):
+    pass
+
+class ArrayLengthMismatchError(Exception):
+    pass
+
+class IndexNotAnIntegerError(Exception):
+    pass

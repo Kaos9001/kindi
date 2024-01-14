@@ -9,7 +9,17 @@ class Value:
         self.value = value
         self.type = vtype
     def __repr__(self):
-        return f"{self.value} <TYPE {self.type}>"
+        return f"{self.value}"# <TYPE {self.type}>"
+
+
+class Array:
+    def __init__(self, length=None, vtype=None, items=None):
+        self.length = length
+        self.type = vtype
+        self.items = items
+
+    def __repr__(self):
+        return f"{self.items} <ARRAY OF {self.type}>"
 
 
 class KindiFunction:
@@ -66,7 +76,61 @@ def evaluate(state, action):
             raise VariableNotDefinedError(var_name)
         return state, state[var_name]
 
-    # Cadeia de comandos (ponto de entrada)
+    elif isinstance(action, ast.Array):
+        array = action
+        candidate_array = [evaluate(state, candidate_item)[1] for candidate_item in array.items]
+        atype = candidate_array[0].type
+        for candidate_item in candidate_array:
+            if candidate_item.type != atype:
+                raise MixedTypesInArrayError(candidate_array[0], candidate_item)
+        return state, Value(vtype='array', value=Array(
+            length=len(candidate_array),
+            vtype=atype,
+            items=candidate_array,
+        ))
+
+    elif isinstance(action, ast.GetFromArray):
+        get_from_array = action
+        if get_from_array.id not in state:
+            raise VariableNotDefinedError(get_from_array.id)
+        if state[get_from_array.id].type != 'array':
+            raise NotAnArrayError(get_from_array.id)
+        array = state[get_from_array.id].value
+        index = evaluate(state, get_from_array.index)[1]
+        if index.type != 'int':
+            raise IndexNotAnIntegerError(index)
+        if index.value < 0 or index.value >= len(array.items):
+            raise OutOfBoundsError(len(array.items), index.value)
+        return state, array.items[index.value]
+
+    elif isinstance(action, ast.AssignArray):
+        array_assignment = action
+        if array_assignment.id in state:
+            raise VariableAlreadyDefinedError(array_assignment.id)
+        candidate_array = evaluate(state, array_assignment.content)[1]
+        for candidate_value in candidate_array.value.items:
+            if candidate_value.type != array_assignment.type:
+                raise AssignmentUnmatchedTypeError(candidate_value.type, array_assignment.type)
+        if len(candidate_array.value.items) != array_assignment.length.value:
+            raise ArrayLengthMismatchError(array_assignment.length.value, len(candidate_array.value.items))
+        state[array_assignment.id] = candidate_array
+        return state, None
+
+    elif isinstance(action, ast.ReassignArray):
+        array_reassignment = action
+        if array_reassignment.id not in state:
+            raise VariableNotDefinedError(array_reassignment.id)
+        candidate_value = evaluate(state, array_reassignment.value)[1]
+        array = state[array_reassignment.id].value
+        if candidate_value.type != array.type:
+            raise ReassignmentUnmatchedTypeError(candidate_value.type, array.type)
+        index = evaluate(state, array_reassignment.index)[1]
+        if index.type != 'int':
+            raise IndexNotAnIntegerError(index)
+        if index.value < 0 or index.value >= len(array.items):
+            raise OutOfBoundsError(len(array.items), index.value)
+        array.items[index.value] = candidate_value
+        return state, None
 
     # Declaracao de variaveis (ex: int a = 1)
     elif isinstance(action, ast.Assign):
@@ -94,7 +158,7 @@ def evaluate(state, action):
     elif isinstance(action, ast.BinOp):
         left, right = evaluate(state, action.left)[1], evaluate(state, action.right)[1]
         if left.type != right.type:
-            raise SyntaxError("tipos incompatives na operacao binop")
+            raise SyntaxError("Tipos incompatives na operacao binop")
         elif left.type == 'int' or left.type == 'float':
             if action.optype == "+":
                 return state, Value(value=left.value + right.value, vtype=left.type)
@@ -174,10 +238,11 @@ def evaluate(state, action):
                 continue
             for i, arg in enumerate(args):
                 if arg.type != arg_set[i].type:
-                    continue
-            break
+                    break
+            else:
+                break
         else:
-            raise InvalidArgumentsError(func.expected(), [arg.type for arg in call.args])
+            raise InvalidArgumentsError(func.expected(), [arg.type for arg in args])
         func_state = state.copy()
         if isinstance(func, UserFunction):
             for i, arg in enumerate(args):

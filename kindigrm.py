@@ -26,7 +26,8 @@ def p_command(p):
                | whileloop
                | write
                | return
-               | assign_array'''
+               | assign_array
+               | reassign_array '''
     p[0] = p[1]
 
 def p_return(p):
@@ -51,6 +52,15 @@ def p_assign_array(p):
     '''assign_array : TYPE ID '[' INT ']' ASSIGNMENT generics
                    | TYPE ID '[' INT ']' ASSIGNMENT array '''
     p[0] = ast.AssignArray(vtype=p[1], id=p[2], length=p[4], content=p[7])
+
+def p_reassign_array(p):
+    '''reassign_array : ID '[' expression ']' ASSIGNMENT expression'''
+    p[0] = ast.ReassignArray(id=p[1], index=p[3], value=p[6])
+
+def p_access_array(p):
+    '''get_array_element : ID '[' expression ']'
+                         | ID '[' generics ']' '''
+    p[0] = ast.GetFromArray(id=p[1], index=p[3])
 
 def p_array(p):
     '''array : '[' expression next_item ']'
@@ -125,7 +135,8 @@ def p_function_def(p):
 
 def p_generics(p):
     '''generics : ID
-                | function_call'''
+                | function_call
+                | get_array_element'''
     p[0] = p[1]
 
 ##################################################

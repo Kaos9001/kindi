@@ -3,7 +3,7 @@ import ply.yacc as yacc
 import sys
 import kindilex
 import kindigrm
-from kindiinterpreter import evaluate, WrappedFunction, OverloadedFunction, Value
+from kindiinterpreter import evaluate, WrappedFunction, OverloadedFunction, Value, Array
 
 from pprint import pprint
 
@@ -28,15 +28,29 @@ print(json_out)
 kd_toString = Value(value=OverloadedFunction(
                         arg_sets=[[Value(value="s", vtype="int")],
                                   [Value(value="s", vtype="float")],
-                                  [Value(value="s", vtype="bool")]],
+                                  [Value(value="s", vtype="bool")],
+                                  [Value(value="s", vtype="array")]],
                         func=lambda s: Value(value=str(s.value), vtype="string")),
                     vtype='builtin_func')
+
+kd_fill = Value(value=OverloadedFunction(
+                        arg_sets=[[Value(value="val", vtype="int"), Value(value="n", vtype="int")],
+                                  [Value(value="val", vtype="float"), Value(value="n", vtype="int")],
+                                  [Value(value="val", vtype="bool"), Value(value="n", vtype="int")]],
+                        func=lambda val, n: Value(value=Array(
+                            vtype=val.type,
+                            length=n.value,
+                            items=[Value(value=val.value, vtype=val.type) for _ in range(n.value)],
+                        ), vtype="array")),
+                    vtype='builtin_func')
+
 
 kd_rot = Value(vtype="builtin_func", value=WrappedFunction(
     args=[Value(value="to_rotate", vtype="subst"), Value(value="n", vtype='int')],
     func=lambda s, n: Value(value=s.value[n.value:] + s.value[:n.value], vtype='subst')))
 
-init_state = {"toString":kd_toString, "rot":kd_rot}
+
+init_state = {"toString":kd_toString, "rot":kd_rot, "fill":kd_fill}
 print(f"KINDI: RUNNING {sys.argv[1]}")
 final_state = evaluate(init_state, ast)
 print()

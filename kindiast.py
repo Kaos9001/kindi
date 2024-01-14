@@ -52,6 +52,12 @@ class Reassign(Node):
         self.id = id
         self.value = value
 
+class ReassignArray(Node):
+    def __init__(self, id=None, value=None, index=None):
+        self.id = id
+        self.value = value
+        self.index = index
+
 
 class Return(Node):
     def __init__(self, value=None):
@@ -120,3 +126,8 @@ class Argument(Node):
     def __init__(self, id=None, atype=None):
         self.id = id
         self.type = atype
+
+class GetFromArray(Node):
+    def __init__(self, id=None, index=None):
+        self.id = id
+        self.index = index

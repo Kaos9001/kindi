@@ -45,3 +45,18 @@ class ArrayLengthMismatchError(Exception):
 
 class IndexNotAnIntegerError(Exception):
     pass
+
+class CannotWriteNonStringToFileError(Exception):
+    pass
+
+class FilePathMustBeStringError(Exception):
+    pass
+
+class FileAlreadyExistsError(Exception):
+    pass
+
+class FileDoesNotExistError(Exception):
+    pass
+
+class NonStringInWordlistError(Exception):
+    pass

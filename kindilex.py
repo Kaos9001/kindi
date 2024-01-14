@@ -17,6 +17,7 @@ reserved = {
     'write': 'WRITE',
     'function' : "FUNCTION_DEF",
     'return' : "RETURN",
+    'wordlist' : "WORDLIST",
     'subst': 'TYPE',
     'bool': 'TYPE',
     'int': 'TYPE',

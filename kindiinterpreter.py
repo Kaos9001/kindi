@@ -3,13 +3,14 @@ from collections import namedtuple
 from kindierrors import *
 from kindilex import reserved
 import json
+from pathlib import Path
 
 class Value:
     def __init__(self, value=None, vtype=None):
         self.value = value
         self.type = vtype
     def __repr__(self):
-        return f"{self.value}"# <TYPE {self.type}>"
+        return f"{self.value} <TYPE {self.type}>"
 
 
 class Array:
@@ -19,7 +20,7 @@ class Array:
         self.items = items
 
     def __repr__(self):
-        return f"{self.items} <ARRAY OF {self.type}>"
+        return f"{[item.value for item in self.items]} <ARRAY OF {self.type}>"
 
 
 class KindiFunction:
@@ -54,7 +55,7 @@ class OverloadedFunction(WrappedFunction):
 
 
 def evaluate(state, action):
-    # Literal (ex: 2)
+    ############## Comandos ##############
     if isinstance(action, ast.Block):
         block = action
         new_state, return_val = evaluate(state, block.command)
@@ -65,43 +66,29 @@ def evaluate(state, action):
         else:
             return new_state, 0
 
-    elif isinstance(action, ast.Literal):
-        literal = action
-        return state, Value(value=literal.value, vtype=literal.type)
+    elif isinstance(action, ast.AssignWordlist):
+        wordlist_assignment = action
+        if wordlist_assignment.id in state:
+            raise VariableAlreadyDefinedError(wordlist_assignment.id)
+        candidate_wordlist = evaluate(state, wordlist_assignment.content)[1]
+        state[wordlist_assignment.id] = candidate_wordlist
+        return state, None
 
-    # Tentativa de acessar valor de variavel (ex: a)
-    elif isinstance(action, str):
-        var_name = action
-        if var_name not in state:
-            raise VariableNotDefinedError(var_name)
-        return state, state[var_name]
-
-    elif isinstance(action, ast.Array):
-        array = action
-        candidate_array = [evaluate(state, candidate_item)[1] for candidate_item in array.items]
-        atype = candidate_array[0].type
-        for candidate_item in candidate_array:
-            if candidate_item.type != atype:
-                raise MixedTypesInArrayError(candidate_array[0], candidate_item)
-        return state, Value(vtype='array', value=Array(
-            length=len(candidate_array),
-            vtype=atype,
-            items=candidate_array,
-        ))
-
-    elif isinstance(action, ast.GetFromArray):
-        get_from_array = action
-        if get_from_array.id not in state:
-            raise VariableNotDefinedError(get_from_array.id)
-        if state[get_from_array.id].type != 'array':
-            raise NotAnArrayError(get_from_array.id)
-        array = state[get_from_array.id].value
-        index = evaluate(state, get_from_array.index)[1]
+    elif isinstance(action, ast.ReassignWordlist):
+        wordlist_reassignment = action
+        if wordlist_reassignment.id not in state:
+            raise VariableNotDefinedError(wordlist_reassignment.id)
+        candidate_value = evaluate(state, wordlist_reassignment.value)[1]
+        wordlist = state[wordlist_reassignment.id].value
+        if candidate_value.type != "string":
+            raise ReassignmentUnmatchedTypeError("string", candidate_value.type)
+        index = evaluate(state, wordlist_reassignment.index)[1]
         if index.type != 'int':
             raise IndexNotAnIntegerError(index)
-        if index.value < 0 or index.value >= len(array.items):
-            raise OutOfBoundsError(len(array.items), index.value)
-        return state, array.items[index.value]
+        if index.value < 0 or index.value >= len(wordlist):
+            raise OutOfBoundsError(len(wordlist), index.value)
+        wordlist[index.value] = candidate_value
+        return state, None
 
     elif isinstance(action, ast.AssignArray):
         array_assignment = action
@@ -154,47 +141,6 @@ def evaluate(state, action):
         state[reassignment.id].value = candidate_value.value
         return state, None
 
-    # Operacoes binarias (ex: a > b)
-    elif isinstance(action, ast.BinOp):
-        left, right = evaluate(state, action.left)[1], evaluate(state, action.right)[1]
-        if left.type != right.type:
-            raise SyntaxError("Tipos incompatives na operacao binop")
-        elif left.type == 'int' or left.type == 'float':
-            if action.optype == "+":
-                return state, Value(value=left.value + right.value, vtype=left.type)
-            elif action.optype == "-":
-                return state, Value(value=left.value - right.value, vtype=left.type)
-            elif action.optype == "*":
-                return state, Value(value=left.value * right.value, vtype=left.type)
-            elif action.optype == "/":
-                if right.value == 0:
-                    raise ZeroDivisionError()
-                if left.type == "float":
-                    return state, Value(value=left.value / right.value, vtype=left.type)
-                elif left.type == "int":
-                    return state, Value(value=left.value // right.value, vtype=left.type)
-                else:
-                    print("????????????")
-            elif action.optype == "%":
-                return state, Value(value=left.value % right.value, vtype=left.type)
-            elif action.optype == "<":
-                return state, Value(value=left.value < right.value, vtype='bool')
-            elif action.optype == ">":
-                return state, Value(value=left.value > right.value, vtype='bool')
-            elif action.optype == "<=":
-                return state, Value(value=left.value <= right.value, vtype='bool')
-            elif action.optype == ">=":
-                return state, Value(value=left.value >= right.value, vtype='bool')
-            elif action.optype == "==":
-                return state, Value(value=left.value == right.value, vtype='bool')
-            elif action.optype == "!=":
-                return state, Value(value=left.value != right.value, vtype='bool')
-        elif left.type == 'bool':
-            if action.optype == "or":
-                return state, Value(value=left.value or right.value, vtype=left.type)
-            if action.optype == "and":
-                return state, Value(value=left.value and right.value, vtype=left.type)
-
     elif isinstance(action, ast.Conditional):
         conditional = action
         out = None
@@ -212,12 +158,20 @@ def evaluate(state, action):
         print(candidate_value.value)
         return state, None
 
-    elif isinstance(action, ast.Concat):
-        concat = action
-        left, right = evaluate(state, concat.left)[1], evaluate(state, concat.right)[1]
-        if left.type != 'string' or right.type != 'string':
-            raise InvalidTypesForConcatError(left.type, right.type)
-        return state, Value(left.value + right.value, vtype='string')
+    elif isinstance(action, ast.Write):
+        write_command = action
+        content = evaluate(state, write_command.content)[1]
+        if content.type != 'string':
+            raise CannotWriteNonStringToFileError(content)
+        filepath_candidate = evaluate(state, write_command.file)[1]
+        if filepath_candidate.type != 'string':
+            raise FilePathMustBeStringError(filepath_candidate)
+        filepath = Path(filepath_candidate.value)
+        if filepath.exists():
+            raise FileAlreadyExistsError(filepath_candidate.value)
+        with open(filepath, "w") as f:
+            f.write(content.value)
+        return state, None
 
     elif isinstance(action, ast.FunctionCall):
         call = action
@@ -264,4 +218,133 @@ def evaluate(state, action):
     elif isinstance(action, ast.Return):
         new_state, out = evaluate(state, action.value)
         return new_state, out
+
+    ############## Expressoes ###############
+    elif isinstance(action, ast.Literal):
+        literal = action
+        return state, Value(value=literal.value, vtype=literal.type)
+
+    # Tentativa de acessar valor de variavel (ex: a)
+    elif isinstance(action, str):
+        var_name = action
+        if var_name not in state:
+            raise VariableNotDefinedError(var_name)
+        return state, state[var_name]
+
+    elif isinstance(action, ast.Wordlist):
+        wordlist = action
+        candidate_wordlist = [evaluate(state, candidate_item)[1] for candidate_item in wordlist.items]
+        for candidate_item in candidate_wordlist:
+            if candidate_item.type != "string":
+                raise NonStringInWordlistError(candidate_item)
+        return state, Value(vtype='wordlist', value=candidate_wordlist)
+
+    elif isinstance(action, ast.Array):
+        array = action
+        candidate_array = [evaluate(state, candidate_item)[1] for candidate_item in array.items]
+        atype = candidate_array[0].type
+        for candidate_item in candidate_array:
+            if candidate_item.type != atype:
+                raise MixedTypesInArrayError(candidate_array[0], candidate_item)
+        return state, Value(vtype='array', value=Array(
+            length=len(candidate_array),
+            vtype=atype,
+            items=candidate_array,
+        ))
+
+    elif isinstance(action, ast.GetFromArray):
+        get_from_array = action
+        if get_from_array.id not in state:
+            raise VariableNotDefinedError(get_from_array.id)
+        if state[get_from_array.id].type != 'array':
+            raise NotAnArrayError(get_from_array.id)
+        array = state[get_from_array.id].value
+        index = evaluate(state, get_from_array.index)[1]
+        if index.type != 'int':
+            raise IndexNotAnIntegerError(index)
+        if index.value < 0 or index.value >= len(array.items):
+            raise OutOfBoundsError(len(array.items), index.value)
+        return state, array.items[index.value]
+
+    elif isinstance(action, ast.GetFromWordlist):
+        get_from_wordlist = action
+        if get_from_wordlist.id not in state:
+            raise VariableNotDefinedError(get_from_wordlist.id)
+        if state[get_from_wordlist.id].type != 'wordlist':
+            raise NotAnArrayError(get_from_wordlist.id)
+        array = state[get_from_array.id].value
+        index = evaluate(state, get_from_array.index)[1]
+        if index.type != 'int':
+            raise IndexNotAnIntegerError(index)
+        if index.value < 0 or index.value >= len(array.items):
+            raise OutOfBoundsError(len(array.items), index.value)
+        return state, array.items[index.value]
+
+    # Operacoes binarias (ex: a > b)
+    elif isinstance(action, ast.BinOp):
+        left, right = evaluate(state, action.left)[1], evaluate(state, action.right)[1]
+        if left.type != right.type:
+            raise SyntaxError("Tipos incompatives na operacao binop")
+        elif left.type == 'int' or left.type == 'float':
+            if action.optype == "+":
+                return state, Value(value=left.value + right.value, vtype=left.type)
+            elif action.optype == "-":
+                return state, Value(value=left.value - right.value, vtype=left.type)
+            elif action.optype == "*":
+                return state, Value(value=left.value * right.value, vtype=left.type)
+            elif action.optype == "/":
+                if right.value == 0:
+                    raise ZeroDivisionError()
+                if left.type == "float":
+                    return state, Value(value=left.value / right.value, vtype=left.type)
+                elif left.type == "int":
+                    return state, Value(value=left.value // right.value, vtype=left.type)
+                else:
+                    print("????????????")
+            elif action.optype == "%":
+                return state, Value(value=left.value % right.value, vtype=left.type)
+            elif action.optype == "<":
+                return state, Value(value=left.value < right.value, vtype='bool')
+            elif action.optype == ">":
+                return state, Value(value=left.value > right.value, vtype='bool')
+            elif action.optype == "<=":
+                return state, Value(value=left.value <= right.value, vtype='bool')
+            elif action.optype == ">=":
+                return state, Value(value=left.value >= right.value, vtype='bool')
+            elif action.optype == "==":
+                return state, Value(value=left.value == right.value, vtype='bool')
+            elif action.optype == "!=":
+                return state, Value(value=left.value != right.value, vtype='bool')
+        elif left.type == 'bool':
+            if action.optype == "or":
+                return state, Value(value=left.value or right.value, vtype=left.type)
+            if action.optype == "and":
+                return state, Value(value=left.value and right.value, vtype=left.type)
+
+    elif isinstance(action, ast.Concat):
+        concat = action
+        left, right = evaluate(state, concat.left)[1], evaluate(state, concat.right)[1]
+        if left.type != 'string' or right.type != 'string':
+            raise InvalidTypesForConcatError(left.type, right.type)
+        return state, Value(left.value + right.value, vtype='string')
+
+    elif isinstance(action, ast.Read):
+        read_command = action
+        filepath_candidate = evaluate(state, read_command.file)[1]
+        if filepath_candidate.type != 'string':
+            raise FilePathMustBeStringError(filepath_candidate)
+        filepath = Path(filepath_candidate.value)
+        if not filepath.exists():
+            raise FileDoesNotExistError(filepath_candidate.value)
+        out = ""
+        with open(filepath, "r") as f:
+            out = f.read()
+        return state, Value(value=out, vtype='string')
+
+    elif isinstance(action, ast.Crypt):
+        if action.type == "encode":
+            encode = action
+
+        elif action.type == "decode":
+            decode = action
 

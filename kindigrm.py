@@ -48,6 +48,15 @@ def p_write(p):
     '''write : WRITE '(' string_like ',' string_like ')' '''
     p[0] = ast.Write(file=p[3], content=p[5])
 
+def p_assign_wordlist(p):
+    '''assign_wordlist : WORDLIST ID ASSIGNMENT generics
+                   | WORDLIST ID ASSIGNMENT wordlist '''
+    p[0] = ast.AssignWordlist(id=p[2], content=p[4])
+
+def p_reassign_wordlist(p):
+    '''reassign_wordlist : ID '[' expression ']' ASSIGNMENT expression'''
+    p[0] = ast.ReassignWordlist(id=p[1], index=p[3], value=p[6])
+
 def p_assign_array(p):
     '''assign_array : TYPE ID '[' INT ']' ASSIGNMENT generics
                    | TYPE ID '[' INT ']' ASSIGNMENT array '''
@@ -62,6 +71,11 @@ def p_access_array(p):
                          | ID '[' generics ']' '''
     p[0] = ast.GetFromArray(id=p[1], index=p[3])
 
+def p_access_wordlist(p):
+    '''get_wordlist_element : ID '[' expression ']'
+                         | ID '[' generics ']' '''
+    p[0] = ast.GetFromWordlist(id=p[1], index=p[3])
+
 def p_array(p):
     '''array : '[' expression next_item ']'
        next_item :
@@ -73,7 +87,16 @@ def p_array(p):
     elif len(p) > 3:
         p[0] = ast.Array(items=list([p[2]]) + p[3])
 
-# TODO: acesso a arrays, indices, reassing de arrays
+def p_wordlist(p):
+    '''wordlist : '{' expression next_w '}'
+       next_w :
+              | ',' expression next_w '''
+    if len(p) == 1:
+        p[0] = []
+    elif p[1] == ",":
+        p[0] = [p[2], *p[3]]
+    elif len(p) > 3:
+        p[0] = ast.Wordlist(items=list([p[2]]) + p[3])
 
 def p_assign(p):
     '''assign : TYPE ID ASSIGNMENT expression'''

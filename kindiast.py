@@ -33,6 +33,15 @@ class Array(Node):
     def __init__(self, items=None):
         self.items = items
 
+class Wordlist(Node):
+    def __init__(self, items=None):
+        self.items = items
+
+class AssignWordlist(Node):
+    def __init__(self, id=None, content=None):
+        self.id = id
+        self.content = content
+
 class AssignArray(Node):
     def __init__(self, id=None, length=None, content=None, vtype=None):
         self.id = id
@@ -52,7 +61,14 @@ class Reassign(Node):
         self.id = id
         self.value = value
 
+
 class ReassignArray(Node):
+    def __init__(self, id=None, value=None, index=None):
+        self.id = id
+        self.value = value
+        self.index = index
+
+class ReassignWordlist(Node):
     def __init__(self, id=None, value=None, index=None):
         self.id = id
         self.value = value
@@ -77,7 +93,7 @@ class Read(Node):
 class Write(Node):
     def __init__(self, file=None, content=None):
         self.content = content
-        self.file = content
+        self.file = file
 
 
 class Crypt(Node):
@@ -128,6 +144,11 @@ class Argument(Node):
         self.type = atype
 
 class GetFromArray(Node):
+    def __init__(self, id=None, index=None):
+        self.id = id
+        self.index = index
+
+class GetFromWordlist(Node):
     def __init__(self, id=None, index=None):
         self.id = id
         self.index = index

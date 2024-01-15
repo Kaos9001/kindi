@@ -1,2 +1,4 @@
-string a = "a"
-print(toString(a))
+subst rot13 = rot(ALPHSUB, 3)
+print(rot13)
+print(ALPH)
+print(invert(rot13))

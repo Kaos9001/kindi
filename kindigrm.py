@@ -74,11 +74,13 @@ def p_array(p):
         p[0] = ast.Array(items=list([p[2]]) + p[3])
 
 def p_assign(p):
-    '''assign : TYPE ID ASSIGNMENT expression'''
+    '''assign : TYPE ID ASSIGNMENT expression
+              | TYPE ID ASSIGNMENT generics '''
     p[0] = ast.Assign(vtype=p[1], id=p[2], value=p[4])
 
 def p_reassign(p):
-    '''reassign : ID ASSIGNMENT expression'''
+    '''reassign : ID ASSIGNMENT expression
+                | ID ASSIGNMENT generics'''
     p[0] = ast.Reassign(id=p[1], value=p[3])
 
 def p_expression(p):

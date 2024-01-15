@@ -49,20 +49,46 @@ kd_rot = Value(vtype="builtin_func", value=WrappedFunction(
     args=[Value(value="to_rotate", vtype="subst"), Value(value="n", vtype='int')],
     func=lambda s, n: Value(value=s.value[n.value:] + s.value[:n.value], vtype='subst')))
 
+kd_lower = Value(vtype="builtin_func", value=WrappedFunction(
+    args=[Value(value="s", vtype='string')],
+    func=lambda s: Value(value=s.value.lower(), vtype='string')))
+
+kd_upper = Value(vtype="builtin_func", value=WrappedFunction(
+    args=[Value(value="s", vtype='string')],
+    func=lambda s: Value(value=s.value.upper(), vtype='string')))
+def ind(char):
+    if char.type != "string":
+        raise TypeError(f"Input must be 1 letter, not {char}")
+    char = char.value.lower()
+    if len(char) != 1 or char not in "abcdefghijklmnopqrstuvwxyz":
+        raise TypeError(f"Input must be 1 letter, not {char}")
+    return Value(value="abcdefghijklmnopqrstuvwxyz".index(char), vtype="int")
+
 kd_ind = Value(vtype="builtin_func", value=WrappedFunction(
     args=[Value(value="char", vtype="string")],
-    func=lambda s: Value(value="abcdefghijklmnopqrstuvwxyz".index(s.value.lower()), vtype='int')))
+    func=ind))
 
-def ind(char):
-    if len(char) != 1:
-        raise Exception()
+def invert(subst):
+    new = list("abcdefghijklmnopqrstuvwxyz")
+    alph = "abcdefghijklmnopqrstuvwxyz"
+    for i in range(26):
+        new[alph.index(subst.value[i])] = alph[i]
+    return Value(value="".join(new), vtype="subst")
 
+
+kd_invert = Value(vtype="builtin_func", value=WrappedFunction(
+    args=[Value(value="to_invert", vtype="subst")],
+    func=invert))
 
 
 init_state = {
     "toString":kd_toString,
     "rot":kd_rot,
     "fill":kd_fill,
+    "ind": kd_ind,
+    "upper": kd_upper,
+    "lower": kd_lower,
+    "invert": kd_invert,
     "ALPH": Value(value="abcdefghijklmnopqrstuvwxyz", vtype="string"),
     "ALPHSUB": Value(value="abcdefghijklmnopqrstuvwxyz", vtype="subst"),
     }

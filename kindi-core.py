@@ -4,7 +4,7 @@ import sys
 import kindilex
 import kindigrm
 from kindiinterpreter import evaluate, WrappedFunction, OverloadedFunction, Value, Array
-
+import json
 from pprint import pprint
 
 debug = False
@@ -21,7 +21,6 @@ ast = parser.parse(content, debug=debug)
 
 pprint(ast.to_dict())
 
-import json
 json_out = json.dumps(ast.to_dict())
 print(json_out)
 
@@ -42,8 +41,7 @@ kd_fill = Value(value=OverloadedFunction(
                             length=n.value,
                             items=[Value(value=val.value, vtype=val.type) for _ in range(n.value)],
                         ), vtype="array")),
-                    vtype='builtin_func')
-
+                vtype='builtin_func')
 
 kd_rot = Value(vtype="builtin_func", value=WrappedFunction(
     args=[Value(value="to_rotate", vtype="subst"), Value(value="n", vtype='int')],
@@ -80,18 +78,38 @@ kd_invert = Value(vtype="builtin_func", value=WrappedFunction(
     args=[Value(value="to_invert", vtype="subst")],
     func=invert))
 
+def count(s):
+    c = [0 for _ in range(26)]
+    alph = "abcdefghijklmnopqrstuvwxyz"
+    for letter in s:
+        if letter not in alph:
+            continue
+        c[alph.index(letter)] += 1
+    return c
+
+kd_count = Value(vtype="builtin_func", value=WrappedFunction(
+    args=[Value(value="texto", vtype="string")],
+    func=lambda s: Value(value=Array(
+        items=count(s.value),
+        vtype="int",
+        length=26,
+    ), vtype="array")))
+
+
 
 init_state = {
-    "toString":kd_toString,
-    "rot":kd_rot,
-    "fill":kd_fill,
+    "toString": kd_toString,
+    "rot": kd_rot,
+    "fill": kd_fill,
     "ind": kd_ind,
     "upper": kd_upper,
     "lower": kd_lower,
     "invert": kd_invert,
+    "count": kd_count,
     "ALPH": Value(value="abcdefghijklmnopqrstuvwxyz", vtype="string"),
     "ALPHSUB": Value(value="abcdefghijklmnopqrstuvwxyz", vtype="subst"),
-    }
+}
+
 print(f"KINDI: RUNNING {sys.argv[1]}")
 final_state = evaluate(init_state, ast)
 print()

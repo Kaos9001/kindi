@@ -63,3 +63,6 @@ class NonStringInWordlistError(Exception):
 
 class OneTimePadKeyLenError(Exception):
     pass
+
+class SubstNotAlphabetPermutationError(Exception):
+    pass

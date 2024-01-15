@@ -1,9 +1,12 @@
 import kindiast as ast
-from collections import namedtuple
+from collections import Counter
 from kindierrors import *
 from kindilex import reserved
-import json
 from pathlib import Path
+
+
+def is_valid_subst(subst):
+    return len(subst) == 26 and Counter(subst.lower()) == Counter("abcdefghijklmnopqrstuvwxyz")
 
 class Value:
     def __init__(self, value=None, vtype=None):
@@ -20,7 +23,7 @@ class Array:
         self.items = items
 
     def __repr__(self):
-        return f"{[item.value for item in self.items]} <ARRAY OF {self.type}>"
+        return f"{[item for item in self.items]} <ARRAY OF {self.type}>"
 
 
 class KindiFunction:
@@ -198,6 +201,10 @@ def evaluate(state, action):
     ############## Expressoes ###############
     elif isinstance(action, ast.Literal):
         literal = action
+        if literal.type == "subst":
+            if not is_valid_subst(literal.value):
+                raise SubstNotAlphabetPermutationError(literal.value)
+            literal.value = literal.value.lower()
         return state, Value(value=literal.value, vtype=literal.type)
 
     # Tentativa de acessar valor de variavel (ex: a)
@@ -298,6 +305,7 @@ def evaluate(state, action):
     elif isinstance(action, ast.Crypt):
         if action.type == "encode":
             encode = action
+
 
         elif action.type == "decode":
             decode = action

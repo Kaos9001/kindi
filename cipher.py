@@ -70,50 +70,26 @@ def one_time_pad(text, key, arg):
         return vigenere(text, key, arg)
     else:
         error_msg = "Key lenght of incompatible lenght ({}), expected: {}".format(len(key), len(text))
-        raise OneTimePadKeyLenError(error_msg)
+        raise EncryptionKeyLenError(error_msg)
     
 # def beaufort(text, key, arg):
 
 
-def table(letter):
-    pos = ord("z") - ord(letter)
-    tt = []
-    for i in range(26):
-        new_pos = (pos-i) % 26
-        nletter = chr(new_pos+ ord("a"))
-        tt.append(nletter)
-    print(tt)
-table("t")
+# def table(letter):
+#     pos = ord("z") - ord(letter)
+#     tt = []
+#     for i in range(26):
+#         new_pos = (pos-i) % 26
+#         nletter = chr(new_pos+ ord("a"))
+#         tt.append(nletter)
+#     print(tt)
 
 
-def xor_strings(text, key) -> bytes:
+def XOR(text, key) -> bytes:
     # exemplo tomado de https://en.wikipedia.org/wiki/XOR_cipher
     """Concate xor two strings together."""
-    if isinstance(text, str):
-        # Text strings contain single characters
-        return "".join(chr(ord(a) ^ b) for a, b in zip(text, key)).encode('utf8')
-    else:
-        # Bytes objects contain integer values in the range 0-255
+    if len(text) == len(key):
         return bytes([a ^ b for a, b in zip(text, key)])
-
-
-message = 'This is a secret message'
-print('Message:', message)
-
-key = "wfhjufnkufsawefgjbcxased".encode('utf8')
-print('Key:', key)
-
-cipherText = xor_strings(message.encode('utf8'), key)
-print('cipherText:', cipherText)
-print('decrypted:', xor_strings(cipherText, key).decode('utf8'))
-
-# Verify
-if xor_strings(cipherText, key).decode('utf8') == message:
-    print('Unit test passed')
-else:
-    print('Unit test failed')
-
-# a = one_time_pad("attackatdawn", "abcdefghijklmnopq", "encode")
-# print(a)
-# b = one_time_pad(a, "abcdefghijklmnopq", "decode")
-# print(b)
+    else:
+        error_msg = "Key lenght of incompatible lenght ({}), expected: {}".format(len(key), len(text))
+        raise EncryptionKeyLenError(error_msg)

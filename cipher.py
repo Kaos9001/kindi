@@ -93,3 +93,15 @@ def XOR(text, key) -> bytes:
     else:
         error_msg = "Key lenght of incompatible lenght ({}), expected: {}".format(len(key), len(text))
         raise EncryptionKeyLenError(error_msg)
+
+def call_encrypt_function(crypt, text, key, arg):
+    if crypt == "substitution":
+        return substitution(text, key, arg)
+    elif crypt == "vigenere":
+        return vigenere(text, key, arg)
+    elif crypt == "autokey":
+        return autokey(text, key, arg)
+    elif crypt == "one_time_pad":
+        return one_time_pad(text, key, arg)
+    elif crypt == "XOR":
+        return XOR(text, key)

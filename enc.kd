@@ -2,5 +2,5 @@
 # print(m)
 # enc = encode<"substitution">(m, 10)
 # print(enc)
-string m = encode<"substitution">("aaaa", 1)
+string m = encode<"one_time_pad">("aaaa", "cbdb")
 print(m)

@@ -84,8 +84,7 @@ class Crypt(Node):
     def __init__(self, ctype=None, style=None, args=None):
         self.type = ctype
         self.style = style
-        self.message = args[0]
-        self.key = args[1]
+        self.args = args
 
 
 class UnaryOp(Node):

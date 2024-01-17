@@ -40,7 +40,13 @@ def to_number_key(text, key):
     return number_key
 
 def vigenere(text, key, arg):
-    number_key = to_number_key(text, key)
+    number_key = []
+    if isinstance(key, int):
+        number_key = to_number_key(text, key)
+    if isinstance(key, str):
+        key = key.lower()
+        for c in key:
+            number_key.append(ord(c) - ord("a"))
     answer = ""
     for i in range(len(text)):
         if arg == "encode":

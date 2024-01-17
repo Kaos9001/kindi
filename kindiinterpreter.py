@@ -308,6 +308,13 @@ def evaluate(state, action):
             encode = action
             style = evaluate(state, encode.style)[1]
             message, key = evaluate(state, encode.args[0])[1], evaluate(state, encode.args[1])[1]
+            if key.type == "subst":
+                if style.value == "substitution" or style.value == "vigenere":
+                    out = call_encrypt_function("vigenere", message.value, key.value, "encode")
+                    return state, Value(value=out, vtype='string')
+                else: 
+                    raise InvalidSubstTypeUse(style.type)
+
             out = call_encrypt_function(style.value, message.value, key.value, "encode")
             return state, Value(value=out, vtype='string')
 

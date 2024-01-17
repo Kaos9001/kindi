@@ -66,3 +66,6 @@ class EncryptionKeyLenError(Exception):
 
 class SubstNotAlphabetPermutationError(Exception):
     pass
+
+class InvalidSubstTypeUse(Exception):
+    pass

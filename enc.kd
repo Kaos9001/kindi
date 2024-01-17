@@ -1,0 +1,6 @@
+# string m = read("lorem_ipsum.txt")
+# print(m)
+# enc = encode<"substitution">(m, 10)
+# print(enc)
+string m = encode<"substitution">("aaaa", 1)
+print(m)

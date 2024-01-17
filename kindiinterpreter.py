@@ -3,6 +3,7 @@ from collections import Counter
 from kindierrors import *
 from kindilex import reserved
 from pathlib import Path
+from cipher import *
 
 
 def is_valid_subst(subst):
@@ -305,8 +306,13 @@ def evaluate(state, action):
     elif isinstance(action, ast.Crypt):
         if action.type == "encode":
             encode = action
-
+            message, key = evaluate(state, encode.message)[1], evaluate(state, encode.key)[1]
+            value = substitution("aaaa", 1, "encode")
+            return state, Value(value=value, vtype='string')
 
         elif action.type == "decode":
             decode = action
+            message, key = evaluate(state, decode.message)[1], evaluate(state, decode.key)[1]
+            value = substitution(message, key, "decode")
+            return state, Value(value=value, vtype='string')
 

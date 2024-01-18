@@ -1,4 +1,4 @@
 string m = read("lorem_ipsum.txt")
 # print(m)
 string enc = encode<"substitution">(m, 10)
-print(enc)
+write("lorem_ipsum_encoded.txt", enc)

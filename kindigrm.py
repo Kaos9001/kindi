@@ -189,7 +189,7 @@ def p_boolean_exp(p):
                    | bool_like AND bool_like
                    | '(' bool_like ')' 
                    | NOT bool_like'''
-    if p[2] == r'\|\|':
+    if p[2] == r'||':
         p[0] = ast.BinOp(optype="or", left=p[1], right=p[3])
     elif p[2] == '&&':
         p[0] = ast.BinOp(optype="and", left=p[1], right=p[3])

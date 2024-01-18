@@ -1,1 +1,2 @@
-bool falso = (! (False))
+bool verd = (!(((!(True)))) || False)
+print(toString(verd))

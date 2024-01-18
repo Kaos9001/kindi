@@ -39,6 +39,25 @@ def to_number_key(text, key):
         number_key.append(num)
     return number_key
 
+
+def substsubst(text, key, arg):
+    key = key.lower()
+    alpha_dict = {}
+    for i in range(len(alphabet_lower)):
+        if arg == "encode":
+            alpha_dict[alphabet_lower[i]] = key[i]
+        elif arg == "decode":
+            alpha_dict[key[i]] = alphabet_lower[i]
+    answer = ""
+    for letter in text:
+        if letter in alphabet_lower:
+            answer += alpha_dict[letter]
+        elif letter in alphabet_upper:
+            answer += chr(ord(alpha_dict[letter]) - ord("a") + ord("A"))
+        else:
+            answer += letter
+    return answer
+
 def vigenere(text, key, arg):
     number_key = []
     if isinstance(key, int):
@@ -111,3 +130,5 @@ def call_encrypt_function(crypt, text, key, arg):
         return one_time_pad(text, key, arg)
     elif crypt == "XOR":
         return XOR(text, key)
+    elif crypt == "substsubst":
+        return substsubst(text, key, arg)

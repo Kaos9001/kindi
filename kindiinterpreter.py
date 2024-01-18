@@ -311,24 +311,14 @@ def evaluate(state, action):
         return state, Value(value=out, vtype='string')
 
     elif isinstance(action, ast.Crypt):
-        if action.type == "encode":
-            encode = action
-            style = evaluate(state, encode.style)[1]
-            message, key = evaluate(state, encode.args[0])[1], evaluate(state, encode.args[1])[1]
-            if key.type == "subst":
-                if style.value == "substitution" or style.value == "vigenere":
-                    out = call_encrypt_function("vigenere", message.value, key.value, "encode")
-                    return state, Value(value=out, vtype='string')
-                else: 
-                    raise InvalidSubstTypeUse(style.type)
-
-            out = call_encrypt_function(style.value, message.value, key.value, "encode")
+        enc_dec = action
+        style = evaluate(state, enc_dec.style)[1]
+        message = evaluate(state, enc_dec.args[0])[1]
+        if style.type == "subst":
+            out = call_encrypt_function("substsubst", message.value, style.value, enc_dec.type)
             return state, Value(value=out, vtype='string')
-
-        elif action.type == "decode":
-            decode = action
-            style = evaluate(state, decode.style)[1]
-            message, key = evaluate(state, decode.args[0])[1], evaluate(state, decode.args[1])[1]
-            value = call_encrypt_function(style.value, message.value, key.value, "decode")
-            return state, Value(value=value, vtype='string')
+        
+        key = evaluate(state, enc_dec.args[1])[1]                
+        out = call_encrypt_function(style.value, message.value, key.value, enc_dec.type)
+        return state, Value(value=out, vtype='string')
 

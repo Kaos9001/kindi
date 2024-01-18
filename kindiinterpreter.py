@@ -242,6 +242,13 @@ def evaluate(state, action):
             raise OutOfBoundsError(len(array.items), index.value)
         return state, array.items[index.value]
 
+    # Operacao unaria (apenas uma, ! bool)
+    elif isinstance(action, ast.UnaryOp):
+        v = evaluate(state, action.arg)[1]
+        if action.type == "!":
+            return state, Value(value= not v.value, vtype="bool")
+
+
     # Operacoes binarias (ex: a > b)
     elif isinstance(action, ast.BinOp):
         left, right = evaluate(state, action.left)[1], evaluate(state, action.right)[1]

@@ -186,14 +186,17 @@ def p_bool_like(p):
 
 def p_boolean_exp(p):
     '''boolean_exp : bool_like OR bool_like
-                  | bool_like AND bool_like
-                  | '(' boolean_exp ')' '''
+                   | bool_like AND bool_like
+                   | '(' bool_like ')' 
+                   | NOT bool_like'''
     if p[2] == r'\|\|':
         p[0] = ast.BinOp(optype="or", left=p[1], right=p[3])
     elif p[2] == '&&':
         p[0] = ast.BinOp(optype="and", left=p[1], right=p[3])
-    else:
+    elif p[1] == '(':
         p[0] = p[2]
+    elif p[1] == '!':
+        p[0] = ast.UnaryOp(optype="!", arg=p[2])
 
 def p_math_eval_exp(p):
     '''math_eval_exp : math_like '<' math_like
@@ -219,9 +222,9 @@ def p_math_eval_exp(p):
     else:
         p[0] = p[2]
 
-def p_not_operator(p):
-    '''bool_like : NOT bool_like'''
-    p[0] = ast.UnaryOp(optype="!", arg=p[2])
+# def p_not_operator(p):
+#     '''boolean_exp : NOT bool_like'''
+#     p[0] = ast.UnaryOp(optype="!", arg=p[2])
 
 ##################################################
 # Sintaxe das expressões de string

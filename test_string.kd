@@ -1,1 +1,6 @@
-encode<"lalalala">("bebebe", "aaa")
+string m ="aaa"
+string b ="aaa"
+if (m==b)
+{
+    print(m)
+}

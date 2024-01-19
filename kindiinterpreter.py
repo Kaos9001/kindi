@@ -289,6 +289,11 @@ def evaluate(state, action):
                 return state, Value(value=left.value or right.value, vtype=left.type)
             if action.optype == "and":
                 return state, Value(value=left.value and right.value, vtype=left.type)
+        elif left.type == 'string':
+            if action.optype == "==":
+                return state, Value(value=left.value == right.value, vtype=left.type)
+            if action.optype == "!=":
+                return state, Value(value=left.value != right.value, vtype=left.type)
 
     elif isinstance(action, ast.Concat):
         concat = action

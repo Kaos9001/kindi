@@ -1,0 +1,6 @@
+string text = "Minha terra tem palmeiras"
+print(encode<"substitution">(text, 10))
+string m = encode<"vigenere">(text, "ondecantaosabia")
+print(m)
+string dm = decode<"vigenere">(m, "ondecantaosabia")
+print(dm)

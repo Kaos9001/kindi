@@ -64,7 +64,9 @@ def vigenere(text, key, arg):
         number_key = to_number_key(text, key)
     if isinstance(key, str):
         key = key.lower()
-        for c in key:
+        for i in range(len(text)):
+            pos = i % len(key)
+            c = key[pos]
             number_key.append(ord(c) - ord("a"))
     answer = ""
     for i in range(len(text)):

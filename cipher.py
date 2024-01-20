@@ -53,7 +53,8 @@ def substsubst(text, key, arg):
         if letter in alphabet_lower:
             answer += alpha_dict[letter]
         elif letter in alphabet_upper:
-            answer += chr(ord(alpha_dict[letter]) - ord("a") + ord("A"))
+            new_letter = chr(ord(letter) + ord("a") - ord("A"))
+            answer += chr(ord(alpha_dict[new_letter]) -ord("a") + ord("A"))
         else:
             answer += letter
     return answer

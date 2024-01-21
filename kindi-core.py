@@ -19,10 +19,10 @@ lexer.input(content)
 
 ast = parser.parse(content, debug=debug)
 
-pprint(ast.to_dict())
+#pprint(ast.to_dict())
 
-json_out = json.dumps(ast.to_dict())
-print(json_out)
+#json_out = json.dumps(ast.to_dict())
+#print(json_out)
 
 kd_toString = Value(value=OverloadedFunction(
                         arg_sets=[[Value(value="s", vtype="int")],
@@ -112,5 +112,5 @@ init_state = {
 
 print(f"KINDI: RUNNING {sys.argv[1]}")
 final_state = evaluate(init_state, ast)
-print()
-print(f"Final Memory State: {final_state}")
+#print()
+#print(f"Final Memory State: {final_state}")

@@ -97,7 +97,7 @@ def one_time_pad(text, key, arg):
     if len(key) >= len(text):
         return vigenere(text, key, arg)
     else:
-        error_msg = "Key lenght of incompatible lenght ({}), expected: {}".format(len(key), len(text))
+        error_msg = "Key length of incompatible length ({}), expected: {}".format(len(key), len(text))
         raise EncryptionKeyLenError(error_msg)
     
 # def beaufort(text, key, arg):
@@ -115,11 +115,11 @@ def one_time_pad(text, key, arg):
 
 def XOR(text, key) -> bytes:
     # exemplo tomado de https://en.wikipedia.org/wiki/XOR_cipher
-    """Concate xor two strings together."""
+    """Concatenate xor two strings together."""
     if len(text) == len(key):
-        return bytes([a ^ b for a, b in zip(text, key)])
+        return "".join([chr(ord(a) ^ ord(b)) for a, b in zip(text, key)])
     else:
-        error_msg = "Key lenght of incompatible lenght ({}), expected: {}".format(len(key), len(text))
+        error_msg = "Key length of incompatible length ({}), expected: {}".format(len(key), len(text))
         raise EncryptionKeyLenError(error_msg)
 
 def call_encrypt_function(crypt, text, key, arg):
